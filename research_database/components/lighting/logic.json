@@ -1,0 +1,28 @@
+{
+  "$schema": "../../schemas/component.schema.json",
+  "roostx_version": "1.0",
+  "component": "lighting",
+  "description": "Automated vehicle lighting including brake, reverse, and hazard logic.",
+  "inputs": [
+    "ROLE_THROTTLE"
+  ],
+  "outputs": [
+    "CH7"
+  ],
+  "logic": [
+    {
+      "name": "brake_lights",
+      "type": "logical_trigger",
+      "condition": "TH < -5",
+      "output": "CH7"
+    },
+    {
+      "name": "reverse_lights",
+      "type": "logical_trigger",
+      "condition": "TH < -10",
+      "delay": 0.5,
+      "output": "CH7"
+    }
+  ],
+  "safety": []
+}

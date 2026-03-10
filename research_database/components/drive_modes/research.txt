@@ -1,0 +1,35 @@
+PATH: components/drive_modes/research.txt
+COMPONENT: drive_modes
+VERSION: 1.0 (Standardized Scaling)
+
+==== DRIVE MODE DEFINITIONS ====
+
+[TRAIL / NORMAL]
+- Description: Standard driving mode with 100% rates.
+- Winch: Disabled.
+- Logic: Default Flight Mode (FM0).
+
+[GATE MODE (CRAWLER)]
+- Description: Precision maneuvering for technical gates.
+- Steering: 70% Weight, 20% Expo.
+- Throttle: 60% Weight, 30% Expo.
+- Winch: Synced to throttle (see winch/research.txt).
+
+[CRAWL / CREEP]
+- Crawl: Throttle cap at 40%. Used for steady ascents.
+- Creep: Throttle cap at 20%. Used for ultra-fine movements.
+
+PATH: components/drive_modes/research.txt
+COMPONENT: drive_modes
+LOGIC: SA switch (3-pos) scales ROLE_THROTTLE via REPL mixers. Normal (100%), Crawl (60%), Creep (25%)[cite: 7, 30].
+
+
+==== HARDWARE MAPPING ====
+- Selector: 3-Position Switch SA.
+- Audio: Voice prompts "trail_mode.wav", "gate_mode.wav", "crawl_mode.wav".
+
+PATH: components/drive_modes/research.txt
+VERSION: 1.0 (Standardized Scaling)
+- SA Switch (3-Pos): Normal (100%), Crawl (60%), Creep (25%).
+- Gate Mode: Adds 20% Expo to steering for technical precision.
+- Logic: Replaces ROLE_THROTTLE weight based on SA position.

@@ -1,0 +1,21 @@
+{
+  "$schema": "../../schemas/component.schema.json",
+  "roostx_version": "1.0",
+  "component": "gyro",
+  "description": "Gyro stabilization gain control for steering.",
+  "inputs": [
+    "ROLE_GYRO_GAIN"
+  ],
+  "outputs": [
+    "CH5"
+  ],
+  "logic": [
+    {
+      "name": "gyro_gain_control",
+      "type": "analog_control",
+      "source": "ROLE_GYRO_GAIN",
+      "target_channel": "CH5"
+    }
+  ],
+  "safety": []
+}

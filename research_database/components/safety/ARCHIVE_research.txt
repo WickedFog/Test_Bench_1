@@ -1,0 +1,43 @@
+PATH: components/safety/research.txt
+COMPONENT: safety
+VERSION: 1.0 (Throttle Cut & Arming)
+
+==== THROTTLE CUT (KILL SWITCH) ====
+- Trigger: Switch SB (Sticky) or Momentary hold.
+- Action: Overrides CH2 (ESC) to -100% (or 0% for crawlers).
+- Logic: L01 = Sticky(SB). 
+
+==== STARTUP PROTECTIONS ====
+- Switch Warning: SA and SD must be in "Up" position to initialize.
+- Neutral Lock: Mode switching (Winch/Drive) is blocked unless |TH| < 2.
+
+==== VISUAL FEEDBACK ====
+- Armed: RGB LED (Red).
+- Safe: RGB LED (Green).
+- SF: PlayTrack "disarmed.wav" / "armed.wav".
+
+PATH: components/safety/research.txt
+COMPONENT: safety
+LOGIC: Universal MT12 Pattern. SD press toggles Armed (Green LED) / Disarmed (Red LED + Throttle Kill)[cite: 20, 48].
+
+PATH: components/safety/research.txt
+VERSION: 1.0 (Universal Interlocks)
+- Arming: L01 = Sticky(SD). Master throttle cut.
+- Neutral Lock: Blocks Winch/Drive swap unless |TH| < 2.
+- UI: Red LED (Safe) / Green LED (Hot).
+
+FILE: components/safety/research.txt
+
+==== UNIVERSAL SAFETY INTERLOCKS ====
+- Concept: Multi-stage arming and throttle protection standardized for the MT12 ecosystem.
+- Throttle Cut (Kill Switch): 
+    - Trigger: L01 = Sticky(SD Button). 
+    - Action: Immediate master throttle cut overriding CH2 (Drive ESC) and CH3 (Rear/Dig ESC) to 0% (or -100% depending on ESC type).
+- Neutral Safety Gate: 
+    - Logic: Prevents critical mode swaps (Winch/Drive) or Launch Sequences unless |TH| < 2.
+- UI & Status Feedback: 
+    - Armed State: RGB LED Solid Red (Hot).
+    - Safe State: RGB LED Solid Green (Safe).
+    - Audio: "armed.wav" on activation, "disarmed.wav" on cut.
+
+END FILE

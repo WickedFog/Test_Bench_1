@@ -1,0 +1,24 @@
+FILE: components/skid_steer/research.txt
+
+==== DIFFERENTIAL DRIVE (SKID-STEER) ====
+
+- Concept: Control two independent ESCs (Left/Right) using standard Trigger (Throttle) and Wheel (Steering) inputs.
+- Hardware Applications: Tanks, Tracked Loaders, Excavators, Dual-Motor Boats (Tugs), and 6x6/8x8 Wheeled Rigs without steering rack geometry.
+
+==== MIXER ARCHITECTURE ====
+- Mixer Pattern (Elevon Style): 
+    - Left Track (CH1): ROLE_THROTTLE + ROLE_STEERING (Weight: 100/100). (Add)
+    - Right Track (CH2): ROLE_THROTTLE - ROLE_STEERING (Weight: 100/100). (Subtract)
+- Bias Tuning: Uses a trim switch to adjust Left/Right motor mismatch via a Global Variable.
+
+==== BEHAVIORAL LOGIC ====
+- Straight Drive: Both motors sync to full forward/reverse on ROLE_THROTTLE when steering is neutral.
+- Pivot Turns: Full opposing counter-rotation occurs when ROLE_THROTTLE is at 0 and ROLE_STEERING is moved.
+- Mixed Turn: During forward movement, Steering biases one motor higher/lower to arc.
+- Scale Steering Dynamics: Reducing steering weights to 50% in the mixer creates slower pivot turns, simulating more realistic, heavy vehicle inertia.
+
+==== ASSETS ====
+- Icon: /IMAGES/tracks.bmp
+- Sound: /SOUNDS/en/tank_mode.wav
+
+END FILE

@@ -1,0 +1,70 @@
+{
+  "roostx_version": "1.0",
+  "description": "RWD Drift configuration for EdgeTX focusing on precision steering and gyro integration.",
+  "supported_radios": [
+    "Radiomaster MT12"
+  ],
+  "default_channel_map": {
+    "CH1": "steering",
+    "CH2": "throttle",
+    "CH3": "gyro_gain",
+    "CH4": "handbrake"
+  },
+  "required_controls": [
+    "steering",
+    "throttle",
+    "gyro_gain"
+  ],
+  "optional_controls": [
+    "handbrake",
+    "lights"
+  ],
+  "modules": {
+    "gyro_management": {
+      "enabled_by_default": true,
+      "type": "remote_gain",
+      "adjustment_source": "knob"
+    }
+  },
+  "input_profiles": {
+    "steering": {
+      "source": "wheel",
+      "expo": 40,
+      "deadband": 0
+    },
+    "throttle": {
+      "source": "trigger",
+      "expo": 15,
+      "curve": "linear"
+    }
+  },
+  "mix_profiles": {
+    "handbrake_mix": {
+      "input": "handbrake",
+      "output": "CH2",
+      "weight": -100,
+      "modes": [
+        "active",
+        "inactive"
+      ]
+    }
+  },
+  "ui_templates": {
+    "layout": "2_zone",
+    "telemetry_primary": "motor_rpm",
+    "status_display": "gyro_level"
+  },
+  "generation_rules": {
+    "linear_steering_response": true,
+    "throttle_curve_soft_start": true
+  },
+  "validation_rules": {
+    "max_channels": 6,
+    "forbidden_controls": [
+      "winch",
+      "dig",
+      "launch_trigger",
+      "two_speed"
+    ]
+  }
+}

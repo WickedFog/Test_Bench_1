@@ -1,0 +1,67 @@
+PATH: components/lighting/research.txt
+COMPONENT: lighting
+VERSION: 1.2 (Merged Deceleration & RGB Status Logic)
+
+==== EXTRACTED FEATURE MODULES ====
+
+[BRAKE LIGHTS - PHYSICAL]
+- Simple Logic: L01 = TH < -5. Triggered by reverse-throw of trigger.
+- Advanced Decel: L01 = (TH < 0) AND (dTH/dt > 0). Uses rate of change to detect drag-braking.
+
+[REVERSE LIGHTS]
+- Logic: L02 = TH < -10.
+- Anti-Flicker: 0.5s Delay. Prevents stutter during technical maneuvers.
+
+[NEUTRAL / HAZARD LOGIC]
+- Logic: |a| < x (Source: ROLE_THROTTLE, Value: 2).
+- Function: Stationary detection for hazard strobes or "idle" scale lighting.
+
+[RGB LED STATUS INDICATORS]
+- Concept: Uses the MT12 built-in LED to show vehicle state.
+- Armed (L1): RGB_LED (Red, Solid).
+- Disarmed (!L1): RGB_LED (Green, Solid).
+- Winch Active (L2): RGB_LED (Blue, Flash).
+- Low Battery: RGB_LED (Yellow, Fast Flash) triggered by Telemetry (Batt < 3.4v).
+
+==== MT12 HARDWARE ROLES ====
+
+ROLE_BRAKE    | Source: TH | Logic: Decel Detection
+ROLE_REVERSE  | Source: TH | Logic: Threshold + Delay
+ROLE_HAZARDS  | Source: TH | Logic: |TH| < 2
+ROLE_STATUS   | Internal   | Logic: Multi-condition RGB mapping
+
+==== IMPLEMENTATION NOTES ====
+Standardizes "Autonomous Scale Signaling." By combining movement telemetry with 
+RGB status feedback, the driver receives critical vehicle data without looking 
+at the LCD or toggling manual light switches.
+
+PATH: components/lighting/research.txt
+COMPONENT: lighting
+LOGIC: SC momentary toggles main lights (L5). Logical switches trigger brake lights based on deceleration[cite: 8, 32].
+
+PATH: components/lighting/research.txt
+VERSION: 1.2 (Decel Logic)
+- Brake Lights: L01 = (TH < 0) AND (dTH/dt > 0). Detects drag-braking.
+- Reverse: L02 = TH < -10 with 0.5s anti-flicker delay.
+- Status: Red (Armed), Yellow Flash (Low Batt), Blue Flash (Winch).
+
+FILE: components/lighting/research.txt
+
+==== SCALE SIGNALING LOGIC ====
+
+- Decel Brake Lights (Advanced): 
+    - Logic: L01 = (TH < 0) AND (dTH/dt > 0). 
+    - Effect: Uses the rate of throttle change to illuminate brake LEDs during active "drag braking" (coasting) deceleration, even if the trigger is not physically pulled. Essential for crawler realism.
+- Reverse Protection: 
+    - Logic: L02 = TH < -10 with a 0.5s Delay.
+    - Effect: Prevents the white reverse lights from flickering during rapid forward/reverse transitions or technical "rock rocking."
+- Turn Signals: 
+    - Logic: L03/L04 trigger when ROLE_STEERING > |80%| for > 1.0s.
+
+==== TELEMETRY RGB STATUS & CONTROL ====
+- Headlights: Main lights toggled via SC momentary switch (Sticky L5).
+- Solid Red: System Armed / Hot.
+- Yellow Flash: Battery voltage critical (Telemetry trigger < 3.4v/cell).
+- Blue Flash: Winch-to-Throttle mode (Scherer Swap) is active.
+
+END FILE

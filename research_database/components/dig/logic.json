@@ -1,0 +1,70 @@
+{
+  "$schema": "../../schemas/component.schema.json",
+  "roostx_version": "1.0",
+  "component": "dig",
+  "description": "Drivetrain manipulation system for crawlers supporting MOA bias control and mechanical dig actuation.",
+  "inputs": [
+    "ROLE_THROTTLE",
+    "ROLE_DIG_SWITCH",
+    "ROLE_BIAS_KNOB1",
+    "ROLE_BIAS_KNOB2"
+  ],
+  "outputs": [
+    "CH2",
+    "CH3",
+    "CH4"
+  ],
+  "logic": [
+    {
+      "name": "moa_bias_mix",
+      "type": "dual_esc_mix",
+      "front_channel": "CH2",
+      "rear_channel": "CH3",
+      "formula": {
+        "front": "TH + GV_BIAS",
+        "rear": "TH - GV_BIAS"
+      }
+    },
+    {
+      "name": "mechanical_dig_servo",
+      "type": "servo_position",
+      "channel": "CH4",
+      "states": {
+        "4wd": 100,
+        "freewheel": 0,
+        "locked": -100
+      },
+      "control": "ROLE_DIG_SWITCH"
+    },
+    {
+      "name": "overdrive_bias_control",
+      "type": "analog_bias",
+      "inputs": [
+        "ROLE_BIAS_KNOB1",
+        "ROLE_BIAS_KNOB2"
+      ],
+      "target_variable": "GV_BIAS"
+    }
+  ],
+  "safety": [
+    {
+      "name": "neutral_shift_gate",
+      "condition": "|TH| < 5",
+      "action": "allow_dig_change"
+    },
+    {
+      "name": "high_speed_shift_lockout",
+      "condition": "TH > 50",
+      "action": "block_dig_change"
+    },
+    {
+      "name": "winch_drive_interlock",
+      "condition": "winch_mode == active",
+      "action": "override_drive_channels_to_zero",
+      "channels": [
+        "CH2",
+        "CH3"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+PATH: components/skid_steer/research.txt
+COMPONENT: skid_steer
+VERSION: 1.0 (Tracked/Dual-Motor Logic)
+
+==== DIFFERENTIAL MIXING (SKID-STEER) ====
+- Hardware: Tanks, Tracked Loaders, Dual-Motor Boats/Tugs.
+- Goal: Control two independent ESCs using standard Trigger/Wheel inputs.
+
+[MIXER ARCHITECTURE]
+- Left Track (CH1): 
+    * Source: ROLE_THROTTLE (Weight: 100%)
+    * Source: ROLE_STEERING (Weight: 100%, Mode: ADD)
+- Right Track (CH2): 
+    * Source: ROLE_THROTTLE (Weight: 100%)
+    * Source: ROLE_STEERING (Weight: 100%, Mode: SUBTRACT)
+
+[BEHAVIORAL LOGIC]
+- Straight Movement: When Steering is neutral, both motors sync to Throttle.
+- Pivot Turn: When Throttle is zero, Steering creates equal and opposite rotation.
+- Mixed Turn: During forward movement, Steering biases one motor higher/lower to arc.
+
+==== MT12 IMPLEMENTATION NOTES ====
+- Most users prefer 100% weights on both inputs for "aggressive" skid-steering.
+- For heavy tanks, a 'Slow' (0.3s) on the mixer is used to prevent instant gear torque-shocks.
+
+==== ASSETS ====
+- Icon: /IMAGES/tracks.bmp
+- Sound: /SOUNDS/en/tank_mode.wav
+
+PATH: components/skid_steer/research.txt
+COMPONENT: skid_steer
+LOGIC: Elevon-style mixing. Supports Pivot Turns (Trigger at 0) and 50% precision steering weights.
+
+PATH: components/skid_steer/research.txt
+VERSION: 1.0 (Dual ESC mixing)
+- Logic: Elevon-style mixing. Left (TH+ST), Right (TH-ST).
+- Pivot Turns: Full opposing rotation when Throttle = 0.
+- Scale: 50% steering weight for realistic heavy vehicle movement.
+
+FILE: components/skid_steer/research.txt
+
+==== DIFFERENTIAL DRIVE (SKID-STEER) ====
+
+- Concept: Control two independent ESCs (Left/Right) using standard Trigger (Throttle) and Wheel (Steering) inputs.
+- Hardware Applications: Tanks, Tracked Loaders, Excavators, Dual-Motor Boats (Tugs), and 6x6/8x8 Wheeled Rigs without steering rack geometry.
+
+==== MIXER ARCHITECTURE ====
+- Mixer Pattern (Elevon Style): 
+    - Left Track (CH1): ROLE_THROTTLE + ROLE_STEERING (Weight: 100/100). (Add)
+    - Right Track (CH2): ROLE_THROTTLE - ROLE_STEERING (Weight: 100/100). (Subtract)
+- Bias Tuning: Uses a trim switch to adjust Left/Right motor mismatch via a Global Variable.
+
+==== BEHAVIORAL LOGIC ====
+- Straight Drive: Both motors sync to full forward/reverse on ROLE_THROTTLE when steering is neutral.
+- Pivot Turns: Full opposing counter-rotation occurs when ROLE_THROTTLE is at 0 and ROLE_STEERING is moved.
+- Mixed Turn: During forward movement, Steering biases one motor higher/lower to arc.
+- Scale Steering Dynamics: Reducing steering weights to 50% in the mixer creates slower pivot turns, simulating more realistic, heavy vehicle inertia.
+
+==== ASSETS ====
+- Icon: /IMAGES/tracks.bmp
+- Sound: /SOUNDS/en/tank_mode.wav
+
+END FILE

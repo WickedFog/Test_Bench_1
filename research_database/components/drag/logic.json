@@ -1,0 +1,33 @@
+{
+  "$schema": "../../schemas/component.schema.json",
+  "roostx_version": "1.0",
+  "component": "drag",
+  "description": "Drag racing launch control system with staged throttle limiting.",
+  "inputs": [
+    "ROLE_THROTTLE",
+    "ROLE_LAUNCH_ARM"
+  ],
+  "outputs": [
+    "CH2"
+  ],
+  "logic": [
+    {
+      "name": "launch_arm",
+      "type": "edge_trigger",
+      "control": "ROLE_LAUNCH_ARM"
+    },
+    {
+      "name": "launch_stage_limit",
+      "type": "throttle_limit",
+      "value": 70,
+      "target_channel": "CH2"
+    }
+  ],
+  "safety": [
+    {
+      "name": "launch_cancel",
+      "condition": "ROLE_LAUNCH_ARM released",
+      "action": "reset_launch"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+FILE: components/ui/research.txt
+
+==== ASSET MANIFEST & UI LAYOUT ====
+- Concept: Standardized file paths and screen layouts for the MT12 ecosystem.
+- Directory Structure Paths:
+    - Icons: /IMAGES/ (64x32 Grayscale BMP format).
+    - Audio: /SOUNDS/en/ (Standard WAV format).
+    - Scripts: /SCRIPTS/TOOLS/ (LUA format).
+- Standard Assets: Icons include crawler.bmp, tracks.bmp, drag.bmp, winch.bmp, safety.bmp.
+
+==== DASHBOARD CONFIGURATION ====
+- Layout: Standardized 4-Zone layout for the MT12 main screen.
+    - Zone 1: Drive Mode (Normal/Crawl/Creep) (Top Left).
+    - Zone 2: Battery Voltage / Cell Average (Top Right).
+    - Zone 3: Winch or Dig Status (Bottom Left).
+    - Zone 4: RSSI / Timer (Bottom Right).
+- Specialized Telemetry Screens: Dashboard, WinchPanel, DragStat.
+
+END FILE

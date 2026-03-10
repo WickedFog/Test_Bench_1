@@ -1,0 +1,16 @@
+{
+  "$schema": "../../schemas/component.schema.json",
+  "roostx_version": "1.0",
+  "component": "ui",
+  "description": "Radio user interface elements such as status display and mode indicators.",
+  "inputs": [],
+  "outputs": [],
+  "logic": [
+    {
+      "name": "status_display",
+      "type": "screen_layout",
+      "layout": "4_zone"
+    }
+  ],
+  "safety": []
+}

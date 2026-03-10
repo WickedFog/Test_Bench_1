@@ -1,0 +1,57 @@
+PATH: components/winch/research.txt
+COMPONENT: winch
+VERSION: 1.4 (Merged Community Standards & Functional Logic)
+
+==== FUNCTIONAL LOGIC: WINCH-ON-THROTTLE (THE "SCHERER" SWAP) ====
+- Concept: Repurpose the throttle trigger for winching to avoid extra knobs[cite: 3].
+- Mode 0 (Drive): Drive ESC follows Throttle Input. Winch ESC is locked at 0[cite: 3].
+- Mode 1 (Winch): Drive ESC is overridden to 0 (Safety). Winch ESC follows Throttle Input[cite: 3, 4].
+
+[SAFETY INTERLOCKS]
+- L01 (Winch Arm): Sticky (V1: SF Down, V2: SF Up). Latching arm mechanism.
+- L02 (Neutral Detect): |a| < x (Source: ROLE_THROTTLE, Value: 2). Detects if trigger is at 0%.
+- L03 (Safety Arm): AND(L01, L02). Only allows the winch mode to activate if the trigger is centered.
+
+==== COMMUNITY STANDARDS & MIXER WEIGHTS ====
+- Trail Mode (Default): CH3 (Winch) Weight 0 (Disabled)[cite: 3, 4].
+- Gate Mode (Winch Sync): 
+    - CH1 (Steer): 70% Weight, 20% Expo (Precision maneuvering).
+    - CH2 (Throttle): 60% Weight, 30% Expo (Slow crawl).
+    - CH3 (Winch): 100% Weight, Source: I2 (Throttle Sync), Switch: L02.
+
+==== AUDIO & VISUAL ASSETS ====
+- Winch ON: L01 -> PlayTrack "winch_on.wav"[cite: 6].
+- Winch OFF: !L01 -> PlayTrack "winch_off.wav"[cite: 6].
+- Mode Switch: SA Switch -> Voice prompts for "Gate Mode" and "Trail Mode"[cite: 6].
+- Icon: /IMAGES/winch.bmp.
+- LUA Tool: /SCRIPTS/TOOLS/winchpanel.lua (Displays real-time sync status)[cite: 8].
+
+==== MT12 HARDWARE ASSIGNMENTS ====
+- ROLE_WINCH_ENABLE: Base button SB (Momentary/Clear) is preferred to prevent accidental engagement.
+- ROLE_MODE_SELECT: 3-Position Switch SA.
+
+PATH: components/winch/research.txt
+COMPONENT: winch
+LOGIC: Scherer Swap Pattern. When L1 is active, CH2 (Drive) is killed and Trigger (TH) drives CH4 (Winch)[cite: 7, 28].
+
+PATH: components/winch/research.txt
+VERSION: 1.1 (Scherer Swap)
+- Concept: Throttle trigger drives winch instead of wheels.
+- Toggle: L01 (Sticky SD).
+- Safety: L02 (Neutral Check) prevents swapping while moving.
+
+FILE: components/winch/research.txt
+
+==== SCHERER SWAP (THROTTLE-ON-WINCH) ====
+- Concept: Reassigning the high-resolution throttle trigger to control a Winch ESC for maximum precision, rather than using a simple on/off switch.
+- Implementation: Re-routes ROLE_THROTTLE from the Drive ESC to the Winch Controller.
+
+==== CONTROL LOGIC & SAFETY ====
+- Swap Toggle: L01 = Sticky(SD Button).
+- Neutral Safety Interlock: L02 = (|TH| < 2). The swap is only permitted if the throttle is at zero. This neutral check prevents drivetrain shock or vehicle lurching when changing modes.
+- Mixer Behavior:
+    - When L01 is Active: CH2 (Drive) is killed (overridden to 0); ROLE_THROTTLE drives CH5 (Winch).
+    - When L01 is Inactive: ROLE_THROTTLE drives CH2 (Drive).
+- Audio Feedback: "winch_mode.wav" alerts the user that the trigger now controls the winch.
+
+END FILE

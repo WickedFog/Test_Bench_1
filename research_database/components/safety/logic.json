@@ -1,0 +1,23 @@
+{
+  "$schema": "../../schemas/component.schema.json",
+  "roostx_version": "1.0",
+  "component": "safety",
+  "description": "General safety interlocks and failsafe logic.",
+  "inputs": [
+    "ROLE_THROTTLE"
+  ],
+  "outputs": [],
+  "logic": [],
+  "safety": [
+    {
+      "name": "signal_loss_failsafe",
+      "condition": "signal_lost",
+      "action": "set_outputs_to_safe"
+    },
+    {
+      "name": "throttle_limit",
+      "condition": "TH > 100",
+      "action": "clamp_output"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "../../schemas/component.schema.json",
+  "roostx_version": "1.0",
+  "component": "drive_modes",
+  "description": "Selectable vehicle driving modes controlling throttle behavior.",
+  "inputs": [
+    "ROLE_DRIVE_MODE"
+  ],
+  "outputs": [
+    "CH2"
+  ],
+  "logic": [
+    {
+      "name": "mode_selector",
+      "type": "mode_switch",
+      "control": "ROLE_DRIVE_MODE",
+      "states": [
+        "normal",
+        "sport",
+        "crawl"
+      ]
+    }
+  ],
+  "safety": []
+}

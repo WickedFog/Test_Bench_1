@@ -1,0 +1,85 @@
+{
+  "$schema": "../schemas/pattern.schema.json",
+  "roostx_version": "1.0",
+  "description": "Standard Rock Crawler configuration for EdgeTX featuring winch, dig unit, and 4WS capability.",
+  "supported_radios": [
+    "Radiomaster MT12"
+  ],
+  "default_channel_map": {
+    "CH1": "steering",
+    "CH2": "throttle",
+    "CH3": "winch",
+    "CH4": "dig",
+    "CH5": "diff_lock",
+    "CH6": "two_speed",
+    "CH7": "lights",
+    "CH8": "rear_steer"
+  },
+  "required_controls": [
+    "steering",
+    "throttle"
+  ],
+  "optional_controls": [
+    "winch",
+    "dig",
+    "diff_lock",
+    "two_speed",
+    "rear_steer",
+    "lights"
+  ],
+  "modules": {
+    "winch_swap": {
+      "enabled_by_default": true,
+      "safety": "throttle_zero_lock"
+    },
+    "dig_actuation": {
+      "type": "servo",
+      "states": [
+        "4wd",
+        "freewheel",
+        "locked"
+      ]
+    }
+  },
+  "input_profiles": {
+    "steering": {
+      "source": "wheel",
+      "expo": 30,
+      "deadband": 2
+    },
+    "throttle": {
+      "source": "trigger",
+      "expo": 20,
+      "curve": "linear"
+    }
+  },
+  "mix_profiles": {
+    "rear_steer_mix": {
+      "input": "steering",
+      "output": "CH8",
+      "weight": "GV1",
+      "modes": [
+        "off",
+        "normal",
+        "crab"
+      ]
+    }
+  },
+  "ui_templates": {
+    "layout": "4_zone",
+    "telemetry_primary": "battery_voltage",
+    "status_display": "drive_mode"
+  },
+  "generation_rules": {
+    "require_neutral_for_mode_switch": true,
+    "lock_throttle_during_winch": true
+  },
+  "validation_rules": {
+    "max_channels": 16,
+    "forbidden_controls": [
+      "gyro_gain",
+      "launch_trigger",
+      "staged_throttle"
+    ]
+  }
+}

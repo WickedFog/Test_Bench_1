@@ -1,0 +1,16 @@
+FILE: components/gyro/research.txt
+
+==== GYRO STABILITY ASSIST ====
+- Concept: Active counter-steer assist mixed into CH1 for drift or high-speed stability.
+- Logic Engine: 
+    - Input: Yaw rate sensor data from an external gyro or stabilized RX is mixed into CH1 (Steering).
+    - Gain Control: S1 Knob (or P1) adjusts the Global Variable GV_Gain (0-100%) to determine the counter-steer assist strength on the fly.
+- Master Toggle: SB switch (Sticky) provides a hard enable/disable master switch for the gyro mix.
+
+==== FEEDBACK ====
+- Visual Indicators: 
+    - RGB LED turns Blue when Gyro logic is active.
+    - RGB LED turns Green when the user provides raw steering input that bypasses or overrides the gyro correction (Counter-steer limit).
+- Audio Cues: "gyro_on.wav" / "gyro_off.wav".
+
+END FILE

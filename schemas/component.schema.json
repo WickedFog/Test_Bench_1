@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RoosTx Component Schema",
+  "type": "object",
+  "required": [
+    "roostx_version",
+    "component",
+    "description",
+    "inputs",
+    "outputs",
+    "logic",
+    "safety"
+  ],
+  "properties": {
+    "roostx_version": {
+      "type": "string"
+    },
+    "component": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "logic": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "safety": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

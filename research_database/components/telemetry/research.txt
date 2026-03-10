@@ -1,0 +1,22 @@
+FILE: components/telemetry/research.txt
+
+==== TELEMETRY MONITORING & ALERTS ====
+- Concept: Automated monitoring of vehicle health via ESC and RX sensor data.
+- Core Sensors:
+    - RxBt: Receiver battery voltage (Internal).
+    - Batt: Main drive pack voltage (via S.Port or ESC Telemetry).
+    - Temp: ESC temperature (Critical for high-geared bashers/drifters).
+    - RPM: Motor speed (Used for scale speed LUA displays).
+
+==== CRITICAL ALERT THRESHOLDS ====
+- Low Battery: Threshold < 3.4v per cell.
+    - Trigger: L04 (Logical Switch).
+    - Action: PlayTrack "lowbatt.wav" + RGB LED Flash (Yellow).
+- Overheat: Threshold > 85°C.
+    - Trigger: L05 (Logical Switch).
+    - Action: PlayTrack "overheat.wav" + Override TH to 50% (Thermal Limp Mode).
+
+==== LUA INTEGRATION ====
+- Data Passthrough: Telemetry values are routed to the "Winch Panel" or "Dashboard" LUA scripts to provide real-time visual feedback on the MT12 screen.
+
+END FILE

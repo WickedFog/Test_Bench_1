@@ -1,0 +1,75 @@
+{
+  "roostx_version": "1.0",
+  "description": "Dual-motor differential mixing for tracked vehicles and skid-steer equipment.",
+  "supported_radios": [
+    "Radiomaster MT12"
+  ],
+  "default_channel_map": {
+    "CH1": "motor_left",
+    "CH2": "motor_right",
+    "CH3": "aux_attachment_1",
+    "CH4": "aux_attachment_2"
+  },
+  "required_controls": [
+    "steering",
+    "throttle"
+  ],
+  "optional_controls": [
+    "lights",
+    "attachment_lift",
+    "attachment_tilt"
+  ],
+  "modules": {
+    "differential_drive": {
+      "enabled_by_default": true,
+      "type": "skid_steer_mixer",
+      "logic": "Elevon-style mixing where Steering (Wheel) adds/subtracts from Throttle (Trigger)[cite: 13]."
+    }
+  },
+  "input_profiles": {
+    "steering": {
+      "source": "wheel",
+      "expo": 20,
+      "deadband": 5
+    },
+    "throttle": {
+      "source": "trigger",
+      "expo": 10,
+      "curve": "linear"
+    }
+  },
+  "mix_profiles": {
+    "left_track_mix": {
+      "input": "throttle",
+      "output": "CH1",
+      "mix_source_2": "steering",
+      "weight": 100,
+      "operator": "add"
+    },
+    "right_track_mix": {
+      "input": "throttle",
+      "output": "CH2",
+      "mix_source_2": "steering",
+      "weight": 100,
+      "operator": "subtract"
+    }
+  },
+  "ui_templates": {
+    "layout": "4_zone",
+    "telemetry_primary": "battery_voltage",
+    "status_display": "track_bias"
+  },
+  "generation_rules": {
+    "allow_pivot_turns": true,
+    "neutral_steering_threshold": 5
+  },
+  "validation_rules": {
+    "max_channels": 8,
+    "forbidden_controls": [
+      "winch_swap",
+      "launch_trigger",
+      "gyro_gain",
+      "dig"
+    ]
+  }
+}

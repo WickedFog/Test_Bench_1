@@ -1,0 +1,136 @@
+PATH: components/dig/research.txt
+COMPONENT: dig
+VERSION: 1.2 (ArminRC MOA Logic Update)
+
+==== ARMINRC DIG/MOA LOGIC (ELECTRONIC) ====
+- Concept: Uses independent ESCs. The "Bias" is stored in a Global Variable.
+- Bias Control: Trim Switches (T5/T6) increment/decrement GV2.
+- The "Burn": Logical switch detects T5-LongPress -> instantly sets GV2 to -100 (Rear Lock).
+- The "Dig": Instantly sets GV2 to 100 (Front Lock).
+
+[MIXER LOGIC]
+- CH2 (Front ESC): Source: TH, Weight: 100, Offset: GV2 (biased positive)
+- CH3 (Rear ESC): Source: TH, Weight: 100, Offset: -GV2 (biased negative)
+
+==== MECHANICAL DIG (SERVO ACTUATED) ====
+- Concept: Shift servo for 3-position drivetrain isolation.
+- States: 
+    1. 4WD: 100% 
+    2. Freewheel: 0% 
+    3. Locked: -100%
+- Safety: Logic Switch prevents shifting if Throttle > 50%.
+
+==== ASSETS ====
+- Sound: /SOUNDS/en/burn_on.wav, dig_on.wav
+- Icon: /IMAGES/moa_bias.bmp
+
+
+PATH: components/dig/research.txt
+COMPONENT: dig
+LOGIC: T5 Long-Press (ArminRC Pattern) adjusts GV1 for rear motor bias. SC Switch handles 3-pos mechanical servos.
+
+In RESEARCH MODE, the following findings regarding DIG logic and MOA bias control are extracted for the research.txt database:
+
+MOA (Motor-on-Axle) Electronic Dig Logic
+
+Dual ESC Mixing: Implementation requires independent front and rear ESCs where CH2 (Front) = TH + Bias and CH3 (Rear) = TH - Bias.
+
+
+Bias Control: Trim switches (T5/T6) are the preferred hardware for incrementing/decrementing a Global Variable (GV1) to adjust front/rear power distribution.
+
+
+Rear Lock/Burn: High-level control logic uses the T5 trim to "lock" or "burn" the rear axle by using GV1 as the specific weight for the Rear ESC mix.
++1
+
+
+Overdrive Control: Analog knobs (P1/P2) can be utilized as a front/rear bias multiplier for on-the-fly overdrive adjustments.
++1
+
+Mechanical Dig Logic
+Servo Actuation: Uses a 3-position switch (such as SC) to control a drivetrain actuator with three distinct states:
+
+
+4WD: Full drive to both axles.
+
+
+Freewheel: Disconnects the rear axle from the drivetrain.
+
+
+Locked: Mechanically locks the rear axle for pivot turns.
+
+
+Hardware Role Mapping: Standardized for the MT12 using ROLE_DIG mapped to SC (3-Pos) or T5/T6 (Trims) depending on whether the system is mechanical or electronic.
++1
+
+
+Channel Mapping: Typically assigned to CH4 for DIG servos or rear ESC control in crawler profiles.
++1
+
+Safety & Interlock Patterns
+
+Mode Swapping: When integrated with a "Winch-to-Throttle" swap pattern, the system must override CH2/CH3 (Drive/Dig) to 0 when Winch Mode is active to prevent vehicle movement while winching.
++1
+
+
+Arming Toggle: Often tied to a logical switch (e.g., L1) which acts as a master arming toggle for advanced drivetrain features.
++1
+
+Would you like me to process findings for drive_modes or steering logic next?
+
+PATH: components/dig/research.txt
+VERSION: 1.2 (ArminRC MOA Update)
+- MOA Logic: CH2 (Front) = TH + Bias; CH3 (Rear) = TH - Bias.
+- Control: T5 Trim increments GV2. Long-press T5 = Instant Rear Lock (-100).
+- Mechanical: CH4 Servo (4WD, Freewheel, Locked).
+- Safety: Prevents DIG shifting if Throttle > 50%.
+
+end of original dig file
+
+====================================================================================
+
+
+FILE: components/dig/research.txt
+
+==== DRIVETRAIN MANIPULATION (DIG/MOA) ====
+
+- MOA Logic: Independent front/rear ESC control. CH2 (Front) = TH + Bias; CH3 (Rear) = TH - Bias.
+- Bias Control (ArminRC): T5/T6 Trims increment GV1/GV2. T5 Long-Press triggers instant Rear Lock/Burn (Sets Rear weight to -100 or 0).
+- Overdrive Control: P1/P2 knobs act as front/rear bias multipliers for on-the-fly adjustments.
+- Mechanical Dig: 3-position servo on CH4. 100% (4WD), 0% (Freewheel), -100% (Locked).
+- Neutral Safety: State changes inhibited unless |TH| < 5.
+- High-Speed Lockout: Mechanical shifting disabled if Throttle > 50% to prevent gear shear.
+- Winch Interlock: Drive/Dig channels overridden to 0 when Winch Mode is active to prevent accidental vehicle movement.
+
+END FILE
+
+
+=======================================================================================
+newest response
+
+FILE: components/dig/research.txt
+
+==== DRIVETRAIN MANIPULATION (DIG/MOA) ====
+- Concept: Independent axle control for technical rock crawling and tight maneuvering.
+- MOA (Motor-on-Axle) Logic: 
+    - Front ESC (CH2): ROLE_THROTTLE + GV_Bias.
+    - Rear ESC (CH3): ROLE_THROTTLE - GV_Bias.
+    - Implementation requires independent front and rear ESCs.
+- Control Pattern (ArminRC): 
+    - T5/T6 Trims: Preferred hardware for incrementing/decrementing Global Variables (GV1/GV2) to adjust power distribution/bias.
+    - T5 Long-Press: Instant Rear Lock/Burn (sets weight on CH3 to -100 or 0).
+- Bias & Overdrive:
+    - GV1/GV2 used as weights for the Rear ESC mix.
+    - Analog knobs (P1/P2) utilized as bias multipliers for on-the-fly overdrive adjustments.
+- Mechanical Dig: 
+    - 3-Position Servo (CH4): 
+        - 100%: 4WD (Locked drivetrain).
+        - 0%: Freewheel (Rear axle disconnected).
+        - -100%: Locked (Rear axle braked for pivot turns).
+    - Hardware Role Mapping: Standardized for MT12 using ROLE_DIG mapped to SC (3-Pos).
+- Safety Interlocks & Patterns: 
+    - Neutral Safety: DIG state changes blocked unless |TH| < 5 to protect gears and electronics.
+    - High-Speed Lockout: Mechanical shifting disabled if Throttle > 50% to prevent gear shear.
+    - Winch Integration: When Winch Mode is active, CH2 and CH3 are overridden to 0 to prevent vehicle movement.
+    - Arming Toggle: Tied to a master logical switch (e.g., L1).
+
+END FILE

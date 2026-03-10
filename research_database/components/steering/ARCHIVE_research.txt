@@ -1,0 +1,59 @@
+PATH: components/steering/research.txt
+COMPONENT: steering
+VERSION: 1.1 (Advanced 4WS Logic)
+
+==== ADVANCED 4WS (THE "SCHERER/ARMIN" PATTERN) ====
+- Concept: Use a Global Variable (GV1) as the 'Weight' for the Rear Steering Mix.
+- Benefit: Instant mode switching without complex mixer stacks.
+
+[LOGIC IMPLEMENTATION]
+- CH1 (Front): Source: ROLE_STEERING, Weight: 100%.
+- CH3 (Rear):  Source: ROLE_STEERING, Weight: GV1 (Global Variable 1).
+
+[STEERING MODES (SA SWITCH)]
+1. Front Only: Switch(SA Up)   -> Set GV1 = 0
+2. Mirrored:   Switch(SA Mid)  -> Set GV1 = 100
+3. Crab:       Switch(SA Down) -> Set GV1 = -100
+
+[INDEPENDENT REAR STEER]
+- Implementation: When SA is in a specific mode (or via a separate toggle), 
+  CH3 source switches from ROLE_STEERING to an analog knob (S2/P2).
+- Use Case: Technical rock crawling where the rear axle needs a specific 
+  angle independent of the front wheels.
+
+==== SMOOTHING ====
+- Realistic Hydraulics: Apply a 'Slow' (0.2s to 0.5s) to the CH3 mixer 
+  to simulate the transit time of hydraulic steering rams.
+  
+  PATH: components/steering/research.txt
+COMPONENT: steering
+LOGIC: ArminRC/Scherer Pattern. GV1 weight on CH3. SA Switch sets GV1 to 0 (2WS), 100 (Mirror), or -100 (Crab)[cite: 31].
+
+PATH: components/steering/research.txt
+VERSION: 1.1 (Scherer/Armin 4WS)
+- Rear Axle: CH3 weight tied to GV1.
+- Modes: 2WS (GV1=0), Mirror (GV1=100), Crab (GV1=-100).
+- Independent: SA-Down routes S2 Knob to CH3 for manual placement.
+
+FILE: components/steering/research.txt
+
+==== ADVANCED 4WS (ARMINRC / SCHERER PATTERN) ====
+
+- Architecture: GV-weighted mixer on CH3 (Rear Axle). CH1 (Front Axle) remains fixed at 100%.
+- Role of GV1: Used as the dynamic 'Weight' for the Rear Steering Mix, allowing instant mode switching without complex mixer stacks.
+
+==== MODE SWITCHING LOGIC ====
+- Hardware: 3-Position SA Switch.
+- 2WS (Front Only): SA Up -> Sets GV1 = 0 (Rear centered).
+- 4WS Mirrored: SA Mid -> Sets GV1 = 100 (Axles turn opposite for tight radius).
+- 4WS Crab: SA Down -> Sets GV1 = -100 (Axles turn same direction for sideways traverse).
+
+==== INDEPENDENT REAR CONTROL ====
+- Independent Mode: Triggered when SA is in a specific position (Down) or via a separate toggle.
+- Logic: CH3 source overrides from ROLE_STEERING (Wheel) to an analog knob (S2/P2).
+- Use Case: Technical rock crawling requiring manual rear axle placement (set and forget) while steering the front normally.
+
+==== REALISM SMOOTHING ====
+- Realistic Hydraulics: A 0.2s to 0.5s 'Slow' is applied to the CH3 mixer to simulate the transit time of hydraulic steering rams.
+
+END FILE

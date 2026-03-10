@@ -1,0 +1,11 @@
+.stfolder/
+.stfolder.removed-*/
+__pycache__/
+*.pyc
+new 1.txt
+001 AI_TEAM/
+001 RoosTx Application Idea/
+003 SORT/
+005 Screenshots/
+ARCHIVE/
+RoosTx.zip

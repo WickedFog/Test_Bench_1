@@ -1,0 +1,29 @@
+{
+  "$schema": "../../schemas/component.schema.json",
+  "roostx_version": "1.0",
+  "component": "steering",
+  "description": "Primary steering control using wheel input with optional rear steering mix support.",
+  "inputs": [
+    "ROLE_STEERING"
+  ],
+  "outputs": [
+    "CH1",
+    "CH8"
+  ],
+  "logic": [
+    {
+      "name": "front_steering",
+      "type": "direct_control",
+      "source": "ROLE_STEERING",
+      "target_channel": "CH1"
+    },
+    {
+      "name": "rear_steering_mix",
+      "type": "mix",
+      "source": "ROLE_STEERING",
+      "target_channel": "CH8",
+      "weight": "GV_RS_WEIGHT"
+    }
+  ],
+  "safety": []
+}

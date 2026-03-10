@@ -1,0 +1,154 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RoosTx Pattern Schema",
+  "description": "Validates vehicle-level pattern configuration files for the RoosTx wizard engine.",
+  "type": "object",
+  "required": [
+    "roostx_version",
+    "description",
+    "supported_radios",
+    "default_channel_map",
+    "required_controls",
+    "optional_controls",
+    "modules",
+    "input_profiles",
+    "mix_profiles",
+    "ui_templates",
+    "generation_rules",
+    "validation_rules"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "roostx_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "supported_radios": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "default_channel_map": {
+      "type": "object",
+      "patternProperties": {
+        "^CH[0-9]+$": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "required_controls": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "optional_controls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "modules": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "enabled_by_default": { "type": "boolean" },
+          "type":               { "type": "string" },
+          "safety":             { "type": "string" },
+          "logic":              { "type": "string" },
+          "states": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "adjustment_source":  { "type": "string" },
+          "description":        { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "input_profiles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["source", "expo"],
+        "properties": {
+          "source":   { "type": "string" },
+          "expo":     { "type": "number" },
+          "deadband": { "type": "number" },
+          "curve":    { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "mix_profiles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["input", "output"],
+        "properties": {
+          "input":        { "type": "string" },
+          "output":       { "type": "string" },
+          "weight": {
+            "oneOf": [
+              { "type": "number" },
+              { "type": "string" }
+            ]
+          },
+          "modes": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "mix_source_2": { "type": "string" },
+          "operator": {
+            "type": "string",
+            "enum": ["add", "subtract", "multiply", "replace"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "ui_templates": {
+      "type": "object",
+      "required": ["layout", "telemetry_primary", "status_display"],
+      "properties": {
+        "layout":            { "type": "string" },
+        "telemetry_primary": { "type": "string" },
+        "status_display":    { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "generation_rules": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    },
+    "validation_rules": {
+      "type": "object",
+      "required": ["max_channels", "forbidden_controls"],
+      "properties": {
+        "max_channels": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "forbidden_controls": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

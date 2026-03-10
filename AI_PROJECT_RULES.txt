@@ -1,0 +1,143 @@
+ROOSTX MULTI-AI PROJECT RULES
+=================================================
+
+Project Name
+RoosTx
+
+Purpose
+RoosTx generates EdgeTX configurations for RC vehicles using reusable logic patterns.
+
+-------------------------------------------------
+
+PROJECT STRUCTURE
+
+Root
+RoosTx/
+
+Research Database
+research_database/
+
+Subfolders
+
+vehicles/
+Example vehicle setups
+
+components/
+Hardware modules
+winch
+lighting
+telemetry
+switches
+
+patterns/
+Reusable control logic patterns
+
+-------------------------------------------------
+
+PATTERN DEFINITION
+
+Patterns describe reusable EdgeTX control logic.
+
+Examples
+
+skid_steer
+moa_dig
+winch_throttle_swap
+
+Patterns must include
+
+PATTERN_NAME
+CATEGORY
+VEHICLE_TYPES
+LOGIC_TYPE
+ROLES
+INPUTS
+LOGIC
+BEHAVIOR
+NOTES
+
+One pattern per file.
+
+-------------------------------------------------
+
+NAMING RULES
+
+lowercase
+underscores only
+no spaces
+
+example
+
+skid_steer_pattern.txt
+winch_swap_pattern.txt
+
+-------------------------------------------------
+
+AI RESPONSIBILITIES
+
+Gemini
+Research extraction
+pattern discovery
+community setup analysis
+
+Claude
+Core engine design
+pattern interpreter
+EdgeTX logic generation
+
+Grok
+Debugging
+validation
+logic verification
+
+ChatGPT
+Architecture
+system design
+data structure
+
+-------------------------------------------------
+
+FILESYSTEM RULES
+
+Never invent new root folders.
+
+Allowed directories
+
+research_database/vehicles
+research_database/components
+research_database/patterns
+
+Unknown material goes to
+
+research_database/unclassified
+
+-------------------------------------------------
+
+OUTPUT FORMAT
+
+When generating research data return
+
+File Name
+Target Folder
+File Contents
+
+-------------------------------------------------
+
+PROJECT GOAL
+
+RoosTx should assemble EdgeTX configurations by combining
+
+vehicle types
+components
+control patterns
+
+Example
+
+crawler
++ skid_steer pattern
++ winch_swap pattern
++ lighting component
+
+-------------------------------------------------
+
+END OF RULES

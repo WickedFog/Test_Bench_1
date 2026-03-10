@@ -1,0 +1,29 @@
+FILE: components/drag/research.txt
+
+==== DRAG LAUNCH & STAGING LOGIC ====
+[Image of a drag race Christmas tree with staging lights]
+- Concept: Automated, timed staging sequences using power locks to hold the vehicle at specific throttle percentages for tire warmup and start line positioning.
+- Drive Modes:
+    - Launch (FM0): Default mode providing full throttle pass-through once the sequence completes.
+    - Stage (FM1): Restricted throttle (15-25%) for precise start line positioning.
+    - WarmUp (FM2): Capped throttle (~70%) for burnout and tire preparation.
+
+==== STAGING SEQUENCE & MIXER IMPLEMENTATION ====
+- Logic: Uses dual FUNC_STICKY timers (L02, L03) to create an automated "bump" into the staging beams.
+- Stage 1 (Pre-Stage): L02 fires immediately for a 1.0s pulse. Throttle is capped at 25% via a REPL (Replace) mixer to prevent blowing the tires off in the water box.
+- Stage 2 (Staged): L03 is delayed by 1.0s, then fires for a 1.0s pulse. Throttle is capped at 75% via a REPL mixer.
+- Ramping/Fade: Implementation uses "Slow Up/Down" (typically 1.0s) on staging and launch mixers to create a realistic engine rev, simulating torque climb.
+
+==== LOGICAL SWITCH STRUCTURES ====
+- Staging Detection (L01): A FUNC_VPOS gate triggers when the throttle is above a minimum threshold (Throttle > 5) AND the staging enabler switch (SC) is held.
+- Timed Pulses (L02/L03): FUNC_STICKY timers create the staging sequence pulses described above.
+- Launch Arm Master (L04): A FUNC_STICKY toggle (standardized to SD button) acts as the master flag. Must be active for the launch sequence to fire.
+
+==== SAFETY & FEEDBACK ====
+- Instant Kill Switch: If the launch/arm switch is released early (before the green light), the ESC must immediately override CH2 (Throttle) to 0%.
+- Visual Christmas Tree: 
+    - Flashing Red LED: Not armed or pre-launch staging in progress.
+    - Solid Green LED: Sequence complete, launch is armed/ready.
+- Audio Assets: Standardized voice tracks mapped to logical switch transitions: "staged.wav", "launch.wav", "burnout.wav".
+
+END FILE

@@ -1,0 +1,34 @@
+FILE: components/dig/research.txt
+
+==== DRIVETRAIN MANIPULATION (DIG/MOA) ====
+
+- Concept: Independent axle control for technical rock crawling and tight maneuvering.
+
+==== MOA (MOTOR-ON-AXLE) ELECTRONIC DIG LOGIC ====
+- Implementation: Requires independent front and rear ESCs (dual ESC setup).
+- Dual ESC Mixing: 
+    - CH2 (Front): ROLE_THROTTLE + GV_Bias (TH + Bias)
+    - CH3 (Rear): ROLE_THROTTLE - GV_Bias (TH - Bias)
+- Bias Control (ArminRC Pattern): 
+    - Hardware Role Mapping: Standardized for MT12 using ROLE_DIG mapped to T5/T6 (Trims).
+    - Weighting: GV1/GV2 are used as the global variable weights for the Rear ESC mix.
+    - T5/T6 Trims: Preferred hardware for incrementing/decrementing Global Variables (GV1/GV2) to adjust power distribution and bias.
+    - T5 Long-Press: Instant Rear Lock/Burn (Instantly sets weight on CH3 to -100 or 0).
+- Overdrive Control: 
+    - Analog knobs (P1/P2) are utilized as bias multipliers for on-the-fly front/rear overdrive adjustments.
+
+==== MECHANICAL DIG LOGIC ====
+- Servo Actuation: Uses a 3-position switch (e.g., SC) on CH4.
+- Hardware Role Mapping: Standardized for MT12 using ROLE_DIG mapped to SC (3-Pos).
+- Mechanical States: 
+    - 100%: 4WD (Locked drivetrain / Full power to both axles).
+    - 0%: Freewheel (Rear axle disconnected for tight gravity turns).
+    - -100%: Locked (Rear axle mechanically braked/locked for front-only pivot turns).
+
+==== SAFETY & INTERLOCK PATTERNS ====
+- Neutral Safety Gate: DIG state changes are inhibited/blocked unless |TH| < 5 to protect gears, motors, and electronics.
+- High-Speed Lockout: Mechanical DIG shifting is disabled if Throttle > 50% to prevent gear shear.
+- Winch Integration: When Winch Mode is active, both CH2 and CH3 (Drive/Dig channels) are overridden to 0 to prevent accidental vehicle movement.
+- Arming Toggle: Linked to Master Logical Switch (L01/L1) for advanced drivetrain features.
+
+END FILE

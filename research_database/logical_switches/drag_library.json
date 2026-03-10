@@ -1,0 +1,491 @@
+{
+  "metadata": {
+    "purpose": "Drag race logical switch reference library",
+    "source": "Gemini research + Grok pattern generation + EdgeTX documentation",
+    "roostx_version": "1.0",
+    "verified_by": "Grok — pending",
+    "critical_constraints": [
+      "GV cannot be used for mix slow-up/slow-down ramp time — those fields are hardcoded numeric only (0.0-25.0s). Lua is the only workaround.",
+      "andsw is a hard gate — sticky switch drops immediately if andsw goes false, not just a filter",
+      "FUNC_EQUAL is unreliable for analog sensors due to jitter — do not use on telemetry"
+    ]
+  },
+
+  "ls_functions": {
+    "FUNC_STICKY": {
+      "ui_label": "Sticky",
+      "description": "Latching relay. Turns ON when set input fires and holds ON until clear input fires. Does not require continuous input to stay active.",
+      "parameters": {
+        "V1": "Set input — fires the latch ON",
+        "V2": "Clear input — forces latch OFF"
+      },
+      "delay_behavior": "How long set condition must be true before latch fires",
+      "duration_behavior": "If set, latch automatically clears itself after this many seconds — enables self-advancing sequences via FUNC_EDGE on the drop-off",
+      "andsw_behavior": "Hard safety gate. Sticky cannot turn ON unless andsw is active. If sticky is already ON and andsw goes false, sticky drops immediately.",
+      "drag_use_case": "Master Run Active switch triggered by trans brake release. Stage timers. Any state that must persist after a momentary input."
+    },
+    "FUNC_VPOS": {
+      "ui_label": "a>x",
+      "description": "True when variable (a) is strictly greater than fixed threshold (x).",
+      "parameters": {
+        "a": "Variable source — stick, knob, telemetry sensor",
+        "x": "Fixed numeric threshold"
+      },
+      "delay_behavior": "How long condition must be met before switch activates",
+      "duration_behavior": "How long switch stays ON after activating, regardless of input",
+      "drag_use_case": "Detect throttle stick past 10% for staging detection. Detect GPS speed above threshold for steering limiter. Primary tool for telemetry comparisons."
+    },
+    "FUNC_VNEG": {
+      "ui_label": "a<x",
+      "description": "True when variable (a) is less than fixed threshold (x).",
+      "parameters": {
+        "a": "Variable source",
+        "x": "Fixed numeric threshold"
+      },
+      "delay_behavior": "How long condition must be met before switch activates",
+      "duration_behavior": "How long switch stays ON after activating",
+      "drag_use_case": "Low battery alarm when pack voltage drops below safe limit. Detect throttle below staging threshold."
+    },
+    "FUNC_APOS": {
+      "ui_label": "|a|>x",
+      "description": "True when absolute value of variable (a) is greater than threshold (x). Ignores sign — works identically in forward and reverse.",
+      "parameters": {
+        "a": "Variable source",
+        "x": "Fixed numeric threshold"
+      },
+      "delay_behavior": "How long condition must be met before switch activates",
+      "duration_behavior": "How long switch stays ON after activating",
+      "drag_use_case": "Measure throttle deflection from center regardless of reverse range."
+    },
+    "FUNC_ANEG": {
+      "ui_label": "|a|<x",
+      "description": "True when absolute value of variable (a) is less than threshold (x). Ignores sign.",
+      "parameters": {
+        "a": "Variable source",
+        "x": "Fixed numeric threshold"
+      },
+      "delay_behavior": "How long condition must be met before switch activates",
+      "duration_behavior": "How long switch stays ON after activating",
+      "drag_use_case": "Detect stick near center regardless of direction."
+    },
+    "FUNC_AND": {
+      "ui_label": "AND",
+      "description": "True only when both V1 and V2 are simultaneously true.",
+      "parameters": {
+        "V1": "First condition",
+        "V2": "Second condition"
+      },
+      "delay_behavior": "How long both conditions must be simultaneously true before switch activates",
+      "duration_behavior": "How long switch stays ON after activating",
+      "drag_use_case": "Safety interlock: allow launch only if arming switch is ON AND throttle is above staging threshold. Gate stage transitions."
+    },
+    "FUNC_OR": {
+      "ui_label": "OR",
+      "description": "True when either V1 or V2 is true.",
+      "parameters": {
+        "V1": "First condition",
+        "V2": "Second condition"
+      },
+      "delay_behavior": "How long either condition must be true before switch activates",
+      "duration_behavior": "How long switch stays ON after activating",
+      "drag_use_case": "Trigger alert from multiple sources — overheat OR low voltage."
+    },
+    "FUNC_XOR": {
+      "ui_label": "XOR",
+      "description": "True when V1 and V2 are in opposite states.",
+      "parameters": {
+        "V1": "First condition",
+        "V2": "Second condition"
+      },
+      "delay_behavior": "How long XOR condition must be met before switch activates",
+      "duration_behavior": "How long switch stays ON after activating",
+      "drag_use_case": "Detect state mismatch between two inputs. Rarely needed in drag racing."
+    },
+    "FUNC_EDGE": {
+      "ui_label": "Edge",
+      "description": "True for a brief moment when an input transitions. Detects the falling or rising edge of a signal. Takes minimum hold time (T1) and maximum hold time (T2) — fires only if input was held between T1 and T2 seconds.",
+      "parameters": {
+        "input": "Switch or logical switch to monitor",
+        "T1": "Minimum hold time before edge fires",
+        "T2": "Maximum hold time — set to -- for no limit"
+      },
+      "delay_behavior": "N/A — edge fires on transition",
+      "duration_behavior": "Controls pulse width of the edge output",
+      "drag_use_case": "Detect drop-off of a STICKY switch with Duration set — this is the domino mechanism for self-advancing stage sequences. Detect deliberate 2-second hold for reset vs accidental press.",
+      "critical_note": "FUNC_EDGE on a STICKY drop-off is how Stage 1 dying automatically triggers Stage 2 — the falling edge of L1 becomes the set input for L2."
+    },
+    "FUNC_TIMER": {
+      "ui_label": "Timer",
+      "description": "Pulses ON and OFF continuously while active. Takes ON time (V1) and OFF time (V2).",
+      "parameters": {
+        "V1": "ON duration in seconds",
+        "V2": "OFF duration in seconds"
+      },
+      "delay_behavior": "How long activation condition must be met before timer starts",
+      "duration_behavior": "Overrides the timer — switch turns off after duration regardless",
+      "drag_use_case": "Flash staging light LED while waiting at the line. Burnout timer pulse."
+    },
+    "FUNC_EQUAL": {
+      "ui_label": "a=x or a=b",
+      "description": "True when a value exactly equals a target.",
+      "parameters": {
+        "a": "Variable source",
+        "x": "Target value"
+      },
+      "delay_behavior": "How long equality must hold before switch activates",
+      "duration_behavior": "How long switch stays ON after activating",
+      "drag_use_case": "Rarely useful — avoid for analog sensors due to jitter. Only reliable for switch positions or integer values.",
+      "verify": true
+    },
+    "FUNC_GREATER": {
+      "ui_label": "a>b",
+      "description": "Compares two live sources against each other. True when source A is greater than source B.",
+      "parameters": {
+        "a": "First live source — stick, GV, telemetry",
+        "b": "Second live source — stick, GV, telemetry, or knob"
+      },
+      "delay_behavior": "How long condition must be met before switch activates",
+      "duration_behavior": "How long switch stays ON after activating",
+      "drag_use_case": "Compare live GPS speed against dialed-in target speed from a knob. Dynamic threshold comparisons."
+    },
+    "FUNC_LESS": {
+      "ui_label": "a<b",
+      "description": "True when source A is less than source B.",
+      "parameters": {
+        "a": "First live source",
+        "b": "Second live source"
+      },
+      "delay_behavior": "How long condition must be met before switch activates",
+      "duration_behavior": "How long switch stays ON after activating",
+      "drag_use_case": "Detect speed dropping below threshold. Battery below knob-set minimum."
+    }
+  },
+
+  "sequence_patterns": {
+    "three_stage_launch_ramp": {
+      "description": "Self-advancing three-stage throttle sequence triggered by trans brake release. No driver input required after release. Uses STICKY Duration as self-destruct timer and FUNC_EDGE on drop-off as domino trigger.",
+      "mechanism": "L1 is master Run Active latch. L2 and L3 are stage timers using AND + Delay. Mix layer uses !L2 and !L3 as Replace gates with stage power values. L3 active = full driver control.",
+      "switches": [
+        {
+          "index": "L1",
+          "func": "FUNC_STICKY",
+          "V1": "ROLE_TRANS_BRAKE release (edge of SC going low)",
+          "V2": "ROLE_RESET or end-of-run reset switch",
+          "andsw": "ROLE_DRIVE_MODE = Race (FM2 active)",
+          "delay": 0,
+          "duration": 0,
+          "notes": "Master run latch. Fires when trans brake releases. andsw ensures it can only arm in Race mode. Stays ON until reset."
+        },
+        {
+          "index": "L2",
+          "func": "FUNC_AND",
+          "V1": "L1",
+          "V2": "L1",
+          "andsw": "NONE",
+          "delay": "GV4 (Stage 1 duration — set by S2 in Race mode)",
+          "duration": 0,
+          "notes": "Stage 2 trigger. Delay = Stage 1 total time. Goes true when L1 has been active for Stage 1 duration. Replaces Stage 1 mix with Stage 2 mix."
+        },
+        {
+          "index": "L3",
+          "func": "FUNC_AND",
+          "V1": "L1",
+          "V2": "L1",
+          "andsw": "NONE",
+          "delay": "GV4 + GV6 (Stage 1 + Stage 2 combined duration)",
+          "duration": 0,
+          "notes": "Stage 3 trigger. Delay = Stage 1 + Stage 2 combined time. Goes true when both stages are complete. Hands full control to driver.",
+          "verify": true,
+          "verify_note": "Confirm EdgeTX supports GV reference in Delay field. If not, fixed values required and Lua needed for adjustable timing."
+        }
+      ],
+      "mix_layer": [
+        {
+          "channel": "CH2 (throttle)",
+          "source": "MAX",
+          "weight": "GV3 (Stage 1 power — set by S1 in Race mode)",
+          "switch": "L1 AND !L2",
+          "mltpx": "REPLACE",
+          "speedUp": "GV4 (ramp time — if GV in speed field is supported, else fixed)",
+          "notes": "Stage 1 — active from launch until Stage 2 triggers. Ramps to Stage 1 power level."
+        },
+        {
+          "channel": "CH2 (throttle)",
+          "source": "MAX",
+          "weight": "GV5 (Stage 2 power — set by S1 cycling to Stage 2)",
+          "switch": "L2 AND !L3",
+          "mltpx": "REPLACE",
+          "speedUp": "GV6 (Stage 2 ramp time)",
+          "notes": "Stage 2 — active after Stage 1 completes until Stage 3 triggers."
+        },
+        {
+          "channel": "CH2 (throttle)",
+          "source": "I1 (throttle input)",
+          "weight": 100,
+          "switch": "L3",
+          "mltpx": "REPLACE",
+          "notes": "Stage 3 — full driver throttle control. All caps removed."
+        }
+      ],
+      "constraint": "Mix speedUp/speedDown fields do not accept GV references in current EdgeTX. Ramp times must be fixed values OR controlled via Lua script reading a GV."
+    },
+
+    "safety_throttle_arm": {
+      "description": "Requires holding trans brake button AND throttle above threshold before anything arms. Prevents accidental full power. Good for bracket racing where driver controls launch but needs a gated arm.",
+      "source": "Grok",
+      "switches": [
+        {
+          "index": "L1",
+          "func": "FUNC_VPOS",
+          "V1": "Thr (throttle channel)",
+          "V2": 5,
+          "notes": "True when throttle is above 5%. Use 10 for extra safety margin."
+        },
+        {
+          "index": "L2",
+          "func": "FUNC_STICKY",
+          "V1": "ROLE_TRANS_BRAKE (momentary press)",
+          "V2": "ROLE_RESET",
+          "andsw": "L1",
+          "notes": "Only latches if throttle is already above threshold (L1). Extra safety layer — can't arm from a dead stick."
+        }
+      ],
+      "mix_layer": [
+        {
+          "channel": "CH2 (throttle)",
+          "source": "I1 (throttle input)",
+          "weight": 100,
+          "switch": "L2",
+          "mltpx": "REPLACE",
+          "notes": "Full throttle curve only active when L2 is latched. Use L2 as enabler for GV writes too."
+        }
+      ],
+      "use_case": "Bracket racing. Simple gate — no timers, full driver control, just prevents accidental arm."
+    },
+
+    "two_stage_timed_ramp": {
+      "description": "Launch button fires master latch. Stage 1 holds low power for 1.5s (wheel spin control), then Stage 2 ramps to 70-80% for 2s, then full blast. GV1 makes Stage 1 power adjustable via knob.",
+      "source": "Grok",
+      "switches": [
+        {
+          "index": "L1",
+          "func": "FUNC_STICKY",
+          "V1": "ROLE_TRANS_BRAKE",
+          "V2": "ROLE_RESET",
+          "andsw": "NONE",
+          "notes": "Master run active latch. Fires on trans brake release."
+        },
+        {
+          "index": "L2",
+          "func": "FUNC_AND",
+          "V1": "L1",
+          "V2": "L1",
+          "andsw": "NONE",
+          "delay": 1.5,
+          "duration": 2.0,
+          "notes": "Stage 1 hold window. Active from 1.5s to 3.5s after launch. Duration = 2.0s window. Write pot to GV1 while L2 is active to make Stage 1 power adjustable."
+        },
+        {
+          "index": "L3",
+          "func": "FUNC_OR",
+          "V1": "L2",
+          "V2": "L1",
+          "andsw": "NONE",
+          "delay": 3.5,
+          "notes": "Full power trigger. Active after Stage 1 window ends. Delay = Stage 1 + Stage 2 combined time.",
+          "verify": true,
+          "verify_note": "Confirm OR with delay behaves as expected — delay applies to condition being true, not individual inputs."
+        }
+      ],
+      "mix_layer": [
+        {
+          "channel": "CH2 (throttle)",
+          "source": "I1",
+          "weight": "GV1 (Stage 1 power — set by S1 knob while L2 active)",
+          "switch": "L2",
+          "mltpx": "ADD",
+          "notes": "Low power stage. GV1 written by pot for real-time adjustment."
+        },
+        {
+          "channel": "CH2 (throttle)",
+          "source": "I1",
+          "weight": 100,
+          "switch": "L3",
+          "mltpx": "ADD",
+          "notes": "Full send. Active after both stages complete."
+        }
+      ],
+      "use_case": "General drag racing. Two-stage with adjustable Stage 1 power via knob. No Lua required for power adjustment — only ramp time needs Lua if adjustability wanted."
+    },
+
+    "throttle_triggered_auto_sequence": {
+      "description": "Hold launch button AND pull full throttle to commit. Auto timed rollout fires — no further input needed. Common slam-and-go setup. Button arms intent, full stick commits.",
+      "source": "Grok",
+      "switches": [
+        {
+          "index": "L1",
+          "func": "FUNC_VPOS",
+          "V1": "Thr",
+          "V2": 95,
+          "notes": "True when throttle is at or above 95% — detects full stick pull."
+        },
+        {
+          "index": "L2",
+          "func": "FUNC_AND",
+          "V1": "ROLE_TRANS_BRAKE",
+          "V2": "L1",
+          "notes": "Requires both button AND full throttle simultaneously. Prevents accidental trigger."
+        },
+        {
+          "index": "L3",
+          "func": "FUNC_STICKY",
+          "V1": "L2",
+          "V2": "ROLE_RESET",
+          "andsw": "NONE",
+          "notes": "Master run latch. Fires once L2 condition is met. Holds for duration of run."
+        },
+        {
+          "index": "L4",
+          "func": "FUNC_TIMER",
+          "V1": 0.8,
+          "V2": 1.2,
+          "notes": "OPTIONAL — staged power blips if wanted. Cosmetic/experimental. Not required for basic sequence.",
+          "optional": true
+        }
+      ],
+      "mix_layer": "Chain delays off L3 same as two_stage_timed_ramp pattern.",
+      "use_case": "Slam-and-go drag cars. More committed trigger than trans brake hold — requires full stick intent."
+    },
+
+    "max_runtime_limiter": {
+      "description": "Hard safety timeout. Full power cuts after X seconds regardless of driver input. Prevents overheating and meltdown on long or runaway runs.",
+      "source": "Grok",
+      "switches": [
+        {
+          "index": "L1",
+          "func": "FUNC_STICKY",
+          "V1": "ROLE_TRANS_BRAKE",
+          "V2": "ROLE_RESET",
+          "notes": "Master run latch — same as other patterns."
+        },
+        {
+          "index": "L5",
+          "func": "FUNC_AND",
+          "V1": "L1",
+          "V2": "L1",
+          "andsw": "NONE",
+          "delay": 0,
+          "duration": 12.0,
+          "notes": "True for exactly 12 seconds after launch then self-clears. Adjust duration for your safe max run time."
+        }
+      ],
+      "mix_layer": [
+        {
+          "channel": "CH2 (throttle)",
+          "source": "MAX",
+          "weight": 0,
+          "switch": "!L5",
+          "mltpx": "REPLACE",
+          "notes": "Inverted — when L5 expires (!L5 goes true), throttle is forced to zero. Hard cut."
+        }
+      ],
+      "use_case": "Any drag setup. Stack on top of any other pattern as a safety layer. Combine with battery voltage telemetry LS for double protection.",
+      "stack_note": "This pattern is designed to be combined with others, not used alone."
+    },
+
+    "trans_brake_hold": {
+      "description": "Locks throttle output to zero while ROLE_TRANS_BRAKE is held. Releases on button drop.",
+      "switches": [
+        {
+          "index": "L_BRAKE",
+          "func": "FUNC_STICKY",
+          "V1": "ROLE_TRANS_BRAKE (SC pressed)",
+          "V2": "ROLE_TRANS_BRAKE (SC released) OR L1 (run latch fires)",
+          "andsw": "ROLE_DRIVE_MODE = Race",
+          "notes": "Active while SC held. Cleared on release (which also fires run latch L1)."
+        }
+      ],
+      "mix_layer": [
+        {
+          "channel": "CH2 (throttle)",
+          "source": "MAX",
+          "weight": 0,
+          "switch": "L_BRAKE",
+          "mltpx": "REPLACE",
+          "notes": "Zero throttle override while trans brake is held."
+        }
+      ]
+    }
+  },
+
+  "gv_patterns": {
+    "knob_to_gv_write": {
+      "description": "Analog knob continuously writes its value to a Global Variable via Special Functions.",
+      "edgetx_fields": {
+        "screen": "Special Functions",
+        "trigger": "ON (always active)",
+        "action": "Adjust GVx",
+        "source": "S1 or S2 (knob channel)"
+      },
+      "drag_use_case": "S1 sets Stage 1 power level (GV3). S2 sets Stage 1 ramp time (GV4). SB cycles which stage S1/S2 currently affect by enabling different SF entries.",
+      "limitations": "GV is updated continuously in real time while the SF is active."
+    },
+    "gv_as_mix_weight": {
+      "description": "GV used directly as the Weight value in a mix instead of a fixed number.",
+      "edgetx_fields": {
+        "screen": "Mixes",
+        "field": "Weight",
+        "method": "Change source type from fixed number to GV reference"
+      },
+      "drag_use_case": "Stage 1 power = GV3 (set by S1 knob). Stage 2 power = GV5. Allows real-time adjustment without editing model.",
+      "limitations": "None known — GV as mix weight is fully supported."
+    },
+    "gv_as_speed_param": {
+      "description": "Attempted use of GV for mix slow-up / slow-down ramp time.",
+      "edgetx_fields": {
+        "screen": "Mixes",
+        "field": "Slow (up/down)"
+      },
+      "drag_use_case": "Adjustable throttle ramp time per stage.",
+      "limitations": "NOT SUPPORTED. Slow up/down fields are hardcoded numeric only (0.0 to 25.0 seconds). GV references are not accepted in these fields.",
+      "workaround": "Write a Lua script that reads the GV value and pushes it into the mix parameter programmatically. This is the only path to adjustable ramp times.",
+      "verify": true,
+      "verify_note": "Confirm this limitation still applies in EdgeTX 2.11.x — may have changed in recent firmware."
+    }
+  },
+
+  "telemetry_sources": {
+    "gps_speed": {
+      "yaml_field_name": "GSpd",
+      "ls_functions_compatible": ["FUNC_VPOS", "FUNC_VNEG", "FUNC_GREATER", "FUNC_LESS"],
+      "example_condition": "FUNC_VPOS: GSpd > 30 (speed above 30 units) triggers steering limiter",
+      "drag_use_case": "Speed-based steering endpoint reduction. Launch detection. 60-foot split logging.",
+      "notes": "Field name populates based on receiver. GSpd is the default GPS speed field name."
+    },
+    "motor_rpm": {
+      "yaml_field_name": "RPM",
+      "ls_functions_compatible": ["FUNC_VPOS", "FUNC_VNEG", "FUNC_GREATER", "FUNC_LESS"],
+      "example_condition": "FUNC_VNEG: RPM < 1000 while throttle is high — indicates wheelspin stall",
+      "drag_use_case": "Traction control detection. Rev limiter confirmation. Launch RPM hold simulation.",
+      "notes": "Requires RPM sensor or ESC telemetry that reports RPM."
+    },
+    "esc_temp": {
+      "yaml_field_name": "EscT",
+      "ls_functions_compatible": ["FUNC_VPOS", "FUNC_VNEG", "FUNC_GREATER", "FUNC_LESS"],
+      "example_condition": "FUNC_VPOS: EscT > 80 triggers thermal protection — reduces throttle cap via GV",
+      "drag_use_case": "Thermal protection. Automatic throttle reduction before ESC cutoff. LED color warning.",
+      "notes": "Field name varies by ESC telemetry protocol. EscT is common default."
+    },
+    "battery_voltage": {
+      "yaml_field_name": "RxBt",
+      "yaml_field_name_alt": ["VFAS", "Cels"],
+      "ls_functions_compatible": ["FUNC_VPOS", "FUNC_VNEG", "FUNC_GREATER", "FUNC_LESS"],
+      "example_condition": "FUNC_VNEG: VFAS < 14.2 triggers low voltage warning and reduces max throttle",
+      "drag_use_case": "Low battery alarm. Progressive throttle reduction to protect pack. Run cutoff at critical voltage.",
+      "notes": "RxBt = receiver battery. VFAS = flight pack voltage via sensor. Cels = cell voltage via FLVSS sensor. Use VFAS or Cels for main drive pack monitoring.",
+      "verify": true,
+      "verify_note": "Confirm correct field name for main drive pack on MT12 + typical RC ESC telemetry combo."
+    },
+    "general_note": "Binary logical functions (AND, OR, XOR, STICKY) cannot be applied directly to raw telemetry feeds. Telemetry values must first pass through FUNC_VPOS, FUNC_VNEG, FUNC_GREATER, or FUNC_LESS to produce a boolean output, which can then be combined with binary functions."
+  }
+}

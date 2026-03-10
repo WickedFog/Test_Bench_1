@@ -1,0 +1,29 @@
+{
+  "$schema": "../../schemas/component.schema.json",
+  "roostx_version": "1.0",
+  "component": "skid_steer",
+  "description": "Differential motor mixing for tracked or skid steer vehicles.",
+  "inputs": [
+    "ROLE_THROTTLE",
+    "ROLE_STEERING"
+  ],
+  "outputs": [
+    "CH1",
+    "CH2"
+  ],
+  "logic": [
+    {
+      "name": "left_track_mix",
+      "type": "differential_mix",
+      "formula": "TH + ST",
+      "target_channel": "CH1"
+    },
+    {
+      "name": "right_track_mix",
+      "type": "differential_mix",
+      "formula": "TH - ST",
+      "target_channel": "CH2"
+    }
+  ],
+  "safety": []
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "../../schemas/component.schema.json",
+  "roostx_version": "1.0",
+  "component": "telemetry",
+  "description": "Telemetry monitoring including battery voltage and signal health.",
+  "inputs": [],
+  "outputs": [],
+  "logic": [
+    {
+      "name": "battery_monitor",
+      "type": "telemetry_watch",
+      "sensor": "battery_voltage"
+    }
+  ],
+  "safety": [
+    {
+      "name": "low_voltage_warning",
+      "condition": "battery_voltage < threshold",
+      "action": "alert_driver"
+    }
+  ]
+}

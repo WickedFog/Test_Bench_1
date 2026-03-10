@@ -1,0 +1,81 @@
+{
+  "$schema": "../schemas/pattern.schema.json",
+  "roostx_version": "1.0",
+  "description": "No-prep Drag Racing configuration for EdgeTX featuring launch control, staged throttle, and safety lockouts.",
+  "supported_radios": [
+    "Radiomaster MT12"
+  ],
+  "default_channel_map": {
+    "CH1": "steering",
+    "CH2": "throttle",
+    "CH3": "parachute",
+    "CH4": "burnout_mode",
+    "CH5": "launch_trigger"
+  },
+  "required_controls": [
+    "steering",
+    "throttle",
+    "launch_trigger"
+  ],
+  "optional_controls": [
+    "parachute",
+    "burnout_mode",
+    "staged_throttle"
+  ],
+  "modules": {
+    "launch_control": {
+      "enabled_by_default": true,
+      "safety": "arm_switch_required",
+      "logic": "hold_and_release"
+    },
+    "throttle_limiter": {
+      "type": "staging",
+      "states": [
+        "burnout",
+        "staging",
+        "race"
+      ]
+    }
+  },
+  "input_profiles": {
+    "steering": {
+      "source": "wheel",
+      "expo": 50,
+      "deadband": 1
+    },
+    "throttle": {
+      "source": "trigger",
+      "expo": 0,
+      "curve": "custom_drag"
+    }
+  },
+  "mix_profiles": {
+    "launch_mix": {
+      "input": "launch_trigger",
+      "output": "CH2",
+      "weight": 100,
+      "modes": [
+        "locked",
+        "active"
+      ]
+    }
+  },
+  "ui_templates": {
+    "layout": "2_zone",
+    "telemetry_primary": "esc_temperature",
+    "status_display": "arm_status"
+  },
+  "generation_rules": {
+    "prevent_reverse_during_race": true,
+    "require_arm_switch_for_launch": true
+  },
+  "validation_rules": {
+    "max_channels": 4,
+    "forbidden_controls": [
+      "winch",
+      "dig",
+      "rear_steer",
+      "gyro_gain"
+    ]
+  }
+}

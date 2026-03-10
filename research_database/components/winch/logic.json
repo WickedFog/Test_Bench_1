@@ -1,0 +1,68 @@
+{
+  "$schema": "../../schemas/component.schema.json",
+  "roostx_version": "1.0",
+  "component": "winch",
+  "description": "Winch control system supporting throttle swap, ESC neutral simulation, and controlled descent behavior.",
+  "inputs": [
+    "ROLE_THROTTLE",
+    "ROLE_WINCH_MODE",
+    "ROLE_WINCH_DIR1",
+    "ROLE_WINCH_DIR2"
+  ],
+  "outputs": [
+    "CH2",
+    "CH3",
+    "CH4"
+  ],
+  "logic": [
+    {
+      "name": "winch_mode_activation",
+      "type": "mode_switch",
+      "control": "ROLE_WINCH_MODE",
+      "states": {
+        "drive_mode": 0,
+        "winch_mode": 1
+      }
+    },
+    {
+      "name": "throttle_to_winch_swap",
+      "type": "input_remap",
+      "condition": "winch_mode == active",
+      "source": "ROLE_THROTTLE",
+      "target_channel": "CH4"
+    },
+    {
+      "name": "drive_neutral_simulation",
+      "type": "drive_override",
+      "condition": "winch_mode == active",
+      "action": "override_drive_channels",
+      "channels": [
+        "CH2",
+        "CH3"
+      ],
+      "value": 0
+    },
+    {
+      "name": "esc_drag_brake_hold",
+      "type": "drag_brake_control",
+      "condition": "winch_direction == reverse",
+      "control": [
+        "ROLE_WINCH_DIR1",
+        "ROLE_WINCH_DIR2"
+      ],
+      "description": "Allows adjustable drag brake during controlled descent while lowering winch load."
+    }
+  ],
+  "safety": [
+    {
+      "name": "throttle_zero_lock",
+      "condition": "TH != 0",
+      "action": "block_mode_change"
+    },
+    {
+      "name": "drive_lock_during_winch",
+      "condition": "winch_mode == active",
+      "action": "disable_drive_output"
+    }
+  ]
+}

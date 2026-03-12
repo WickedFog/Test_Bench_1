@@ -1,0 +1,17 @@
+/* RoosTx Design Tokens — LOCKED Session 8
+   Import with: @import '../docs/design-tokens.css'; */
+
+:root {
+  --bg:      #080b0e;   /* Page background */
+  --panel:   #0d1219;   /* Panel background */
+  --border:  #1e2d3d;   /* Borders / dividers */
+  --accent:  #00ccff;   /* Primary cyan — active states, glow, logo */
+  --accent2: #ff6b00;   /* Orange — generate button, CH numbers */
+  --green:   #00ff88;   /* Done steps, download button, green LED */
+  --red:     #ff3355;   /* Red LED */
+  --yellow:  #ffd700;   /* Yellow LED */
+  --text:    #ddeeff;   /* Primary readable text */
+  --dim:     #5a7888;   /* Muted labels, inactive elements */
+  --yaml:    #88bbcc;   /* YAML output text */
+  --code-bg: #050708;   /* Output box background */
+}

@@ -39,7 +39,7 @@ CompanionDumper.add_representer(str, no_quote_flight_modes)
 # ── Default model skeleton ────────────────────────────────────────────────────
 
 DEFAULT_MODEL = {
-    "semver": "2.11.4",
+    "semver": "2.11.3",
     "header": {"name": "New Model", "bitmap": "", "labels": ""},
     "noGlobalFunctions": 0, "thrTrim": 0, "trimInc": 0, "displayTrims": 0,
     "ignoreSensorIds": 0, "showInstanceIds": 0, "disableThrottleWarning": 0,
@@ -92,9 +92,20 @@ class EdgeTXModel:
         fm = make_flight_mode(name, switch)
         self._data["flightModeData"][str(idx)] = fm
 
-    def add_input(self, idx, src, name=""):
-        # Simplified — add to expoData if needed
-        pass  # implement if needed for full expo
+    def add_input(self, idx, src, name="", weight=100, offset=0, curve_type=0, curve_value=0):
+        expo = {
+            "chn": idx,
+            "srcRaw": src,
+            "weight": weight,
+            "name": name,
+            "mode": 3,
+            "offset": offset,
+            "curve": {"type": curve_type, "value": curve_value},
+            "swtch": "NONE",
+        }
+        self._data["expoData"].append(expo)
+        if name:
+            self._data["inputNames"][str(idx)] = name
 
     def set_input_name(self, idx, name):
         self._data["inputNames"][str(idx)] = name

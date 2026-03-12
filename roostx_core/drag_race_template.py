@@ -56,10 +56,10 @@ def build(name="Drag Race", reg_id="MT12", radio_map=None):
 
     # Logical Switches
     launch_arm = radio_map["ROLE_LAUNCH_ARM"]
-    m.add_logical_switch(0, "FUNC_VPOS", "I1,5", and_switch="SC2")  # L1: staged detect
+    m.add_logical_switch(0, "FUNC_VPOS", "I1,5", and_switch="SC1")  # L1: staged detect
     m.add_logical_switch(1, "FUNC_STICKY", "L1,NONE", delay=0, duration=10, and_switch="L1")  # L2: first pulse
     m.add_logical_switch(2, "FUNC_STICKY", "L1,NONE", delay=10, duration=10, and_switch="L1")  # L3: second pulse
-    m.add_logical_switch(3, "FUNC_STICKY", f"{launch_arm}2,{launch_arm}2")  # L4: arm sticky
+    m.add_logical_switch(3, "FUNC_STICKY", f"{launch_arm}1,{launch_arm}1")  # L4: arm sticky
 
     # Custom Functions
     m.add_custom_fn(0, "!L4", "OVERRIDE_CHANNEL", "1,0,1")  # throttle kill

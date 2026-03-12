@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoosTx — EdgeTX Surface Wizard</title>
+<style>
+  :root {
+    --bg:      #080b0e;
+    --panel:   #0d1219;
+    --border:  #1e2d3d;
+    --accent:  #00ccff;
+    --accent2: #ff6b00;
+    --green:   #00ff88;
+    --red:     #ff3355;
+    --yellow:  #ffd700;
+    --text:    #ddeeff;
+    --dim:     #5a7888;
+    --glow:    0 0 22px rgba(0,204,255,0.35);
+    --glow2:   0 0 22px rgba(255,107,0,0.35);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', 'Lucida Console', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-size: 15px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg,
+      transparent, transparent 2px,
+      rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+    pointer-events: none; z-index: 1000;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,204,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,204,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  .container {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 30px 22px;
+    position: relative; z-index: 1;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-wrap {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  /* Mean rooster - bobs head aggressively */
+  .rooster {
+    width: 70px; height: 64px;
+    filter: drop-shadow(0 0 8px rgba(0,204,255,0.6));
+    animation: headbob 2.8s ease-in-out infinite;
+    transform-origin: 50% 85%;
+  }
+
+  @keyframes headbob {
+    0%,100% { transform: rotate(-4deg) translateY(0); }
+    25%      { transform: rotate(3deg) translateY(-2px); }
+    50%      { transform: rotate(-2deg) translateY(1px); }
+    75%      { transform: rotate(4deg) translateY(-1px); }
+  }
+
+  .logo-svg {
+    display: block;
+    width: 380px; height: 80px;
+    filter: drop-shadow(0 0 20px rgba(0,204,255,0.5));
+  }
+
+  .tagline {
+    color: var(--dim);
+    font-size: 0.8rem;
+    letter-spacing: 5px;
+    margin-top: 10px;
+    text-transform: uppercase;
+  }
+
+  .version-badge {
+    display: inline-block;
+    background: rgba(0,204,255,0.08);
+    border: 1px solid rgba(0,204,255,0.3);
+    color: var(--accent);
+    font-size: 0.68rem;
+    padding: 4px 14px;
+    letter-spacing: 3px;
+    margin-top: 10px;
+  }
+
+  /* ── STEP BAR ── */
+  .step-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: var(--dim);
+    letter-spacing: 2px;
+    margin-bottom: 7px;
+  }
+
+  .steps-bar {
+    display: flex; gap: 4px;
+    margin-bottom: 22px;
+  }
+
+  .step-seg { flex:1; height:3px; background:var(--border); transition:background .4s; }
+  .step-seg.active { background:var(--accent); box-shadow:0 0 8px var(--accent); }
+  .step-seg.done   { background:var(--green); }
+
+  /* ── PANEL — fixed height, flex layout ── */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    display: none;
+    flex-direction: column;
+    height: 540px;          /* fixed height — no jumping */
+    position: relative;
+    animation: fadeIn .3s ease;
+    margin-bottom: 20px;
+  }
+
+  .panel.active { display: flex; }
+
+  .panel::before {
+    content: '';
+    position: absolute; top:0; left:0; right:0; height:2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+
+  @keyframes fadeIn {
+    from { opacity:0; transform:translateY(6px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .panel-title {
+    font-size: 0.78rem;
+    letter-spacing: 4px;
+    color: var(--accent);
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 22px 26px 16px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Scrollable content area */
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 26px;
+  }
+
+  .panel-body::-webkit-scrollbar       { width: 4px; }
+  .panel-body::-webkit-scrollbar-track { background: var(--bg); }
+  .panel-body::-webkit-scrollbar-thumb { background: var(--accent); }
+
+  /* Pinned button bar */
+  .panel-footer {
+    flex-shrink: 0;
+    border-top: 1px solid var(--border);
+    padding: 14px 26px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    background: var(--panel);
+  }
+
+  /* ── VEHICLE GRID ── */
+  .vehicle-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .vehicle-card {
+    border: 1px solid var(--border);
+    padding: 18px 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all .2s;
+    background: rgba(0,0,0,0.3);
+    position: relative;
+  }
+
+  .vehicle-card:hover       { border-color: var(--accent); box-shadow: var(--glow); }
+  .vehicle-card.selected    { border-color: var(--accent); background: rgba(0,204,255,0.07); box-shadow: var(--glow); }
+  .vehicle-card.unavailable { opacity: .3; cursor: not-allowed; }
+  .vehicle-card.selected::after { content:'✓'; position:absolute; top:5px; right:8px; color:var(--accent); font-size:.72rem; }
+
+  .vehicle-icon   { font-size: 2rem; margin-bottom: 6px; display: block; }
+  .vehicle-name   { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
+  .vehicle-status { font-size: 0.56rem; color: var(--dim); margin-top: 3px; }
+
+  /* ── FEATURE LIST ── */
+  .feature-list { display:flex; flex-direction:column; gap:9px; }
+
+  .feature-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 13px 14px;
+    border: 1px solid var(--border);
+    cursor: pointer; transition: all .2s;
+    background: rgba(0,0,0,0.2);
+  }
+
+  .feature-item:hover  { border-color: rgba(0,204,255,0.4); }
+  .feature-item.active { border-color: var(--accent); background: rgba(0,204,255,0.06); }
+
+  .toggle {
+    width:36px; height:20px;
+    border: 1px solid var(--dim); border-radius:10px;
+    position:relative; flex-shrink:0; margin-top:2px;
+    transition:all .2s; background:rgba(0,0,0,0.4);
+  }
+  .toggle::after {
+    content:''; position:absolute;
+    width:14px; height:14px; background:var(--dim);
+    border-radius:50%; top:2px; left:2px; transition:all .2s;
+  }
+  .feature-item.active .toggle          { border-color:var(--accent); background:rgba(0,204,255,0.12); }
+  .feature-item.active .toggle::after   { left:18px; background:var(--accent); box-shadow:0 0 5px var(--accent); }
+
+  .feature-name { font-size:.68rem; letter-spacing:2px; font-weight:bold; margin-bottom:3px; color:var(--text); }
+  .feature-desc { font-size:.64rem; color:var(--dim); line-height:1.5; }
+  .feature-why  {
+    font-size:.61rem; color:var(--accent); margin-top:6px;
+    padding:5px 10px; border-left:2px solid var(--accent);
+    background:rgba(0,204,255,0.04); display:none; line-height:1.6;
+  }
+  .feature-item.active .feature-why { display:block; }
+
+  /* ── RADIO LIST ── */
+  .radio-list { display:flex; flex-direction:column; gap:9px; }
+
+  .radio-item {
+    display:flex; align-items:center; gap:14px;
+    padding:14px 16px; border:1px solid var(--border);
+    cursor:pointer; transition:all .2s;
+  }
+  .radio-item:hover       { border-color:rgba(0,204,255,0.4); }
+  .radio-item.selected    { border-color:var(--accent); background:rgba(0,204,255,0.06); }
+  .radio-item.unavailable { opacity:.3; cursor:not-allowed; }
+
+  .radio-dot {
+    width:12px; height:12px; border:1px solid var(--dim);
+    border-radius:50%; flex-shrink:0; transition:all .2s;
+  }
+  .radio-item.selected .radio-dot { border-color:var(--accent); background:var(--accent); box-shadow:0 0 8px var(--accent); }
+
+  .radio-name     { font-size:.66rem; letter-spacing:2px; font-weight:bold; color:var(--text); }
+  .radio-channels { font-size:.61rem; color:var(--dim); margin-top:2px; }
+
+  /* ── INPUT ── */
+  .input-group  { margin-bottom:18px; }
+  .input-label  { font-size:.65rem; color:var(--dim); letter-spacing:2px; margin-bottom:7px; display:block; }
+
+  .input-field {
+    width:100%; background:rgba(0,0,0,0.4);
+    border:1px solid var(--border); color:var(--text);
+    font-family:'Courier New', monospace; font-size:.9rem;
+    padding:10px 13px; outline:none; transition:border-color .2s;
+  }
+  .input-field:focus { border-color:var(--accent); box-shadow:var(--glow); }
+
+  /* ── REVIEW ── */
+  .summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
+  .summary-block { background:rgba(0,0,0,0.3); border:1px solid var(--border); padding:13px; }
+  .summary-label { font-size:.62rem; color:var(--dim); letter-spacing:2px; margin-bottom:7px; }
+  .summary-value { font-size:.76rem; color:var(--accent); font-weight:bold; letter-spacing:1px; }
+
+  .feature-pills { display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; }
+  .pill {
+    background:rgba(0,204,255,0.08); border:1px solid rgba(0,204,255,0.3);
+    color:var(--accent); font-size:.57rem; padding:3px 8px; letter-spacing:1px;
+  }
+
+  .section-label {
+    font-size:.62rem; color:var(--dim); letter-spacing:3px;
+    text-transform:uppercase; margin-bottom:10px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  .ch-map  { margin-top:12px; }
+  .ch-row  { display:flex; gap:8px; align-items:center; padding:6px 0; border-bottom:1px solid rgba(30,45,61,.5); font-size:.65rem; }
+  .ch-num    { color:var(--accent2); width:34px; flex-shrink:0; font-weight:bold; }
+  .ch-func   { color:var(--text); flex:1; }
+  .ch-switch { color:var(--dim); font-size:.61rem; }
+
+  /* ── OUTPUT ── */
+  .status-bar {
+    display:flex; align-items:center; gap:10px;
+    padding:9px 14px; background:rgba(0,0,0,0.3);
+    border:1px solid var(--border); margin-bottom:12px; font-size:.65rem;
+  }
+  .led { width:8px; height:8px; border-radius:50%; background:var(--dim); flex-shrink:0; }
+  .led.green  { background:var(--green);  box-shadow:0 0 8px var(--green); }
+  .led.red    { background:var(--red);    box-shadow:0 0 8px var(--red); }
+  .led.yellow { background:var(--yellow); box-shadow:0 0 8px var(--yellow); }
+
+  .output-box {
+    background:#050708; border:1px solid var(--border);
+    padding:14px; font-size:.65rem; line-height:1.9;
+    height: 300px;
+    overflow-y:auto; white-space:pre; color:#8bc; margin-bottom:4px;
+  }
+  .output-box::-webkit-scrollbar       { width:4px; }
+  .output-box::-webkit-scrollbar-track { background:var(--bg); }
+  .output-box::-webkit-scrollbar-thumb { background:var(--accent); }
+
+  /* ── BUTTONS ── */
+  .btn {
+    font-size:.66rem; letter-spacing:3px; padding:11px 28px;
+    border:1px solid; cursor:pointer; text-transform:uppercase;
+    transition:all .2s; background:transparent;
+    font-family:'Courier New', monospace; font-weight:bold;
+  }
+  .btn-primary  { border-color:var(--accent); color:var(--accent); }
+  .btn-primary:hover { background:var(--accent); color:var(--bg); box-shadow:var(--glow); }
+
+  .btn-secondary { border-color:var(--dim); color:var(--dim); }
+  .btn-secondary:hover { border-color:var(--text); color:var(--text); }
+
+  .btn-generate {
+    border-color:var(--accent2); color:var(--accent2);
+    width:100%; padding:15px; font-size:.82rem; letter-spacing:6px;
+    margin-bottom: 6px;
+  }
+  .btn-generate:hover { background:var(--accent2); color:var(--bg); box-shadow:var(--glow2); }
+
+  .btn-download { border-color:var(--green); color:var(--green); flex:1; padding:12px; }
+  .btn-download:hover { background:var(--green); color:var(--bg); box-shadow:0 0 20px rgba(0,255,136,.3); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ── HEADER ── -->
+  <div class="header">
+    <div class="logo-wrap">
+
+      <!-- Mean rooster silhouette -->
+      <svg class="rooster" viewBox="0 0 70 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="rg" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stop-color="#00ccff"/>
+            <stop offset="100%" stop-color="#0088bb"/>
+          </linearGradient>
+        </defs>
+        <!-- Spiky comb - aggressive, pointed upward -->
+        <path d="M30 18 L26 4 L31 12 L33 2 L36 11 L39 5 L40 16" 
+              fill="url(#rg)" stroke="#00ccff" stroke-width="0.5"/>
+        <!-- Head - angular, wider at jaw -->
+        <path d="M22 18 C20 20 19 25 20 30 C21 34 24 37 28 38 C32 39 37 38 40 35 C43 32 44 28 43 24 C42 20 40 18 37 17 C34 16 27 16 22 18Z"
+              fill="url(#rg)"/>
+        <!-- Angry brow - heavy, downward angle -->
+        <path d="M24 24 L30 21" stroke="#050708" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M36 21 L42 24" stroke="#050708" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Eyes - mean slits -->
+        <ellipse cx="28" cy="26" rx="3.5" ry="2.5" fill="#050708"/>
+        <ellipse cx="39" cy="26" rx="3.5" ry="2.5" fill="#050708"/>
+        <!-- Eye glints -->
+        <circle cx="29.5" cy="25" r="1" fill="#00ccff" opacity=".8"/>
+        <circle cx="40.5" cy="25" r="1" fill="#00ccff" opacity=".8"/>
+        <!-- Beak - hooked, sharp, pointing down aggressively -->
+        <path d="M31 32 L35 30 L39 32 L36 38 L34 38 Z" fill="#0a1520"/>
+        <path d="M31 32 L35 30 L39 32 L37 35 L33 35 Z" fill="#00ccff" opacity=".7"/>
+        <!-- Wattle - small, angular -->
+        <path d="M33 38 L31 42 L35 41 Z" fill="#00ccff" opacity=".6"/>
+        <!-- Neck / chest -->
+        <path d="M22 35 C18 38 17 44 19 50 C21 56 26 60 33 61 C40 62 46 58 48 52 C50 46 48 40 44 37 C42 36 40 35 38 35 L28 35 Z"
+              fill="url(#rg)" opacity=".9"/>
+        <!-- Chest feather detail lines -->
+        <path d="M28 42 C30 40 34 40 36 42" stroke="#050708" stroke-width="1" fill="none" opacity=".6"/>
+        <path d="M26 48 C29 46 35 46 38 48" stroke="#050708" stroke-width="1" fill="none" opacity=".6"/>
+        <!-- Wing hint left -->
+        <path d="M19 45 C14 44 11 48 13 52 C16 51 19 49 22 47Z" fill="url(#rg)" opacity=".7"/>
+        <!-- Wing hint right -->
+        <path d="M48 44 C53 43 56 47 54 51 C51 50 48 48 46 46Z" fill="url(#rg)" opacity=".7"/>
+      </svg>
+
+      <!-- Logo — bold SVG lettering with aggressive treatment -->
+      <svg class="logo-svg" viewBox="0 0 380 80" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stop-color="#00ccff"/>
+            <stop offset="60%"  stop-color="#00aadd"/>
+            <stop offset="100%" stop-color="#ff6b00"/>
+          </linearGradient>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="hardglow" x="-10%" y="-10%" width="120%" height="120%">
+            <feGaussianBlur stdDeviation="1.5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- Corner brackets -->
+        <path d="M3 6 L3 3 L18 3"  stroke="#00ccff" stroke-width="1.5" fill="none" opacity=".5"/>
+        <path d="M362 3 L377 3 L377 6" stroke="#ff6b00" stroke-width="1.5" fill="none" opacity=".5"/>
+        <path d="M3 74 L3 77 L18 77"  stroke="#00ccff" stroke-width="1.5" fill="none" opacity=".5"/>
+        <path d="M362 77 L377 77 L377 74" stroke="#ff6b00" stroke-width="1.5" fill="none" opacity=".5"/>
+
+        <!-- Thick dark stroke layer for depth -->
+        <text x="190" y="58"
+          text-anchor="middle"
+          font-family="'Courier New', 'Lucida Console', monospace"
+          font-size="58" font-weight="bold" letter-spacing="8"
+          fill="none" stroke="#001a2a" stroke-width="8"
+          stroke-linejoin="round">RoosTx</text>
+
+        <!-- Outer glow layer -->
+        <text x="190" y="58"
+          text-anchor="middle"
+          font-family="'Courier New', 'Lucida Console', monospace"
+          font-size="58" font-weight="bold" letter-spacing="8"
+          fill="url(#lg1)" filter="url(#glow)" opacity=".5">RoosTx</text>
+
+        <!-- Main fill -->
+        <text x="190" y="58"
+          text-anchor="middle"
+          font-family="'Courier New', 'Lucida Console', monospace"
+          font-size="58" font-weight="bold" letter-spacing="8"
+          fill="url(#lg1)" filter="url(#hardglow)">RoosTx</text>
+
+        <!-- Thin inner highlight stroke -->
+        <text x="190" y="58"
+          text-anchor="middle"
+          font-family="'Courier New', 'Lucida Console', monospace"
+          font-size="58" font-weight="bold" letter-spacing="8"
+          fill="none" stroke="rgba(200,240,255,0.25)" stroke-width="1">RoosTx</text>
+
+        <!-- Underline -->
+        <line x1="28" y1="66" x2="352" y2="66" stroke="url(#lg1)" stroke-width="1" opacity=".4"/>
+      </svg>
+
+    </div>
+    <div class="tagline">EdgeTX Model Generator &nbsp;·&nbsp; Surface RC</div>
+    <div class="version-badge">v0.4 — CLAUDE V1 — WIZARD PREVIEW</div>
+  </div>
+
+  <!-- ── STEP BAR ── -->
+  <div class="step-labels">
+    <span>VEHICLE</span><span>RADIO</span><span>FEATURES</span><span>REVIEW</span><span>OUTPUT</span>
+  </div>
+  <div class="steps-bar">
+    <div class="step-seg active" id="seg0"></div>
+    <div class="step-seg" id="seg1"></div>
+    <div class="step-seg" id="seg2"></div>
+    <div class="step-seg" id="seg3"></div>
+    <div class="step-seg" id="seg4"></div>
+  </div>
+
+  <!-- ── STEP 0 ── -->
+  <div class="panel active" id="step0">
+    <div class="panel-title">// 01 — Select Vehicle Type</div>
+    <div class="panel-body">
+      <div class="vehicle-grid">
+        <div class="vehicle-card selected" data-vehicle="Rock Crawler" onclick="selectVehicle(this)">
+          <span class="vehicle-icon">🪨</span>
+          <div class="vehicle-name">Rock Crawler</div>
+          <div class="vehicle-status">● READY</div>
+        </div>
+        <div class="vehicle-card" data-vehicle="Drag Racer" onclick="selectVehicle(this)">
+          <span class="vehicle-icon">🏁</span>
+          <div class="vehicle-name">Drag Racer</div>
+          <div class="vehicle-status">● READY</div>
+        </div>
+        <div class="vehicle-card unavailable">
+          <span class="vehicle-icon">💨</span>
+          <div class="vehicle-name">Drifter</div>
+          <div class="vehicle-status">○ COMING SOON</div>
+        </div>
+        <div class="vehicle-card unavailable">
+          <span class="vehicle-icon">💥</span>
+          <div class="vehicle-name">Basher</div>
+          <div class="vehicle-status">○ COMING SOON</div>
+        </div>
+        <div class="vehicle-card unavailable">
+          <span class="vehicle-icon">⛵</span>
+          <div class="vehicle-name">Boat</div>
+          <div class="vehicle-status">○ COMING SOON</div>
+        </div>
+        <div class="vehicle-card unavailable">
+          <span class="vehicle-icon">🚜</span>
+          <div class="vehicle-name">Skid Steer</div>
+          <div class="vehicle-status">○ COMING SOON</div>
+        </div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">// MODEL NAME</label>
+        <input class="input-field" id="modelName" type="text" value="Rock Crawler" maxlength="16">
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-primary" onclick="goTo(1)">NEXT →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 1 ── -->
+  <div class="panel" id="step1">
+    <div class="panel-title">// 02 — Select Radio</div>
+    <div class="panel-body">
+      <div class="radio-list">
+        <div class="radio-item selected" data-radio="Radiomaster MT12" onclick="selectRadio(this)">
+          <div class="radio-dot"></div>
+          <div>
+            <div class="radio-name">Radiomaster MT12</div>
+            <div class="radio-channels">10CH · SA(3pos) SB(3pos) SC(mom) SD(mom) S1(knob) S2(knob) FL1 FL2</div>
+          </div>
+        </div>
+        <div class="radio-item unavailable">
+          <div class="radio-dot"></div>
+          <div>
+            <div class="radio-name">Radiomaster MT12S</div>
+            <div class="radio-channels">Coming Soon</div>
+          </div>
+        </div>
+        <div class="radio-item unavailable">
+          <div class="radio-dot"></div>
+          <div>
+            <div class="radio-name">Jumper T15</div>
+            <div class="radio-channels">Coming Soon</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-secondary" onclick="goTo(0)">← BACK</button>
+      <button class="btn btn-primary" onclick="goTo(2)">NEXT →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2 ── -->
+  <div class="panel" id="step2">
+    <div class="panel-title">// 03 — Feature Selection</div>
+    <div class="panel-body" id="featureContainer"></div>
+    <div class="panel-footer">
+      <button class="btn btn-secondary" onclick="goTo(1)">← BACK</button>
+      <button class="btn btn-primary" onclick="goTo(3)">NEXT →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 3 ── -->
+  <div class="panel" id="step3">
+    <div class="panel-title">// 04 — Review Configuration</div>
+    <div class="panel-body" id="reviewContent"></div>
+    <div class="panel-footer" style="flex-direction:column; gap:8px; align-items:stretch;">
+      <button class="btn btn-generate" onclick="goTo(4)">⚡ GENERATE MODEL FILE</button>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button class="btn btn-secondary" onclick="goTo(2)">← BACK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 4 ── -->
+  <div class="panel" id="step4">
+    <div class="panel-title">// 05 — Generated Output</div>
+    <div class="panel-body">
+      <div class="status-bar">
+        <div class="led green"></div>
+        <span id="statusText">Model generated successfully</span>
+      </div>
+      <div class="output-box" id="yamlOutput"></div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-secondary" onclick="goTo(3)">← BACK</button>
+      <button class="btn btn-download" onclick="downloadYml()">⬇ DOWNLOAD .YML</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+const state = { vehicle:'Rock Crawler', radio:'Radiomaster MT12', modelName:'Rock Crawler', features:{} };
+
+const FEATURES = {
+  'Rock Crawler': [
+    { id:'four_wheel_steering', name:'4-Wheel Steering',          desc:'Front, rear, mirror and crab steering modes via switch', why:'Three Logical Switches handle mode selection. Rear-same tightens turn radius, crab lets you slide sideways onto a ledge, full 4WS gives max angle. Mapped to SB (3-pos).', default:true },
+    { id:'winch',               name:'Winch with Safety Lockout', desc:'Winch control with automatic throttle kill when armed',   why:'Logical Switch L5 enforces the safety — if the winch is armed, throttle is locked at zero. You cannot drive and winch simultaneously.', default:true },
+    { id:'creep_mode',          name:'Creep / Crawl Modes',       desc:'Drive mode switch: Normal → Crawl (60%) → Creep (25%)',  why:'Built as Flight Mode mix overrides so your stick input stays linear — only output is scaled. SA 3-pos controls the mode. Inch over technical terrain without killing your trigger finger.', default:true },
+    { id:'reverse_steering',    name:'Reverse Steering',          desc:'Flip steering direction without rewiring',               why:'Applied at the input level as a -100 weight on the ST channel. Cleaner than reversing at the servo — affects all mixes that reference the steering input.', default:false }
+  ],
+  'Drag Racer': [
+    { id:'launch_control',   name:'Launch Control (Trans Brake)', desc:'Hold-and-release launch with staged throttle sequence',        why:'Sticky Logical Switches L1/L2/L3 create timed power stages. SC held = throttle locked at zero. Release = launch fires. LED red until staged, green on go.', default:true },
+    { id:'burnout_mode',     name:'Burnout Mode + Timer',         desc:'SA pos 0 — throttle cap via S1 knob, auto-shutoff via S2',    why:'SA 3-way: Burnout / Staging / Race. In Burnout, S1 caps throttle for tire heating without launching. Timer cuts it automatically for consistent prep every run.', default:true },
+    { id:'staged_throttle',  name:'Staged Throttle Ramp (3-Stage)', desc:'Power ramp: 0→stage1→stage2→full driver control',           why:'S1 adjusts power levels, S2 adjusts timing in Race mode, SB cycles stage target. Prevents wheelspin on launch by ramping in controlled steps.', default:true },
+    { id:'delay_box',        name:'Delay Box (Reaction Timer)',   desc:'FL1 enable — trim switch adjusts delay in ~1ms increments',   why:'Lua script enforces 1ms resolution over a 0.5s window using Extra Fine trim mode. Only arms in Race mode. Dial your reaction time to the tree.', default:false },
+    { id:'parachute',        name:'Parachute Channel',            desc:'Dedicated CH3 output for parachute deployment servo',         why:'Simple pass-through on CH3. No logic needed — clean channel assignment so your chute servo has its own dedicated output.', default:false }
+  ]
+};
+
+function getChannelMap(v, f) {
+  if (v==='Rock Crawler') {
+    const m=[{ch:'CH1',func:'Front Steering',sw:'ST (wheel)'},{ch:'CH2',func:'Throttle / ESC',sw:'TH (trigger)'}];
+    if(f.four_wheel_steering) m.push({ch:'CH3',func:'Rear Steering (4WS)',sw:'SB → I2'});
+    if(f.winch)               m.push({ch:'CH4',func:'Winch Motor',sw:'SD → directional'});
+    return m;
+  }
+  if (v==='Drag Racer') {
+    const m=[{ch:'CH1',func:'Steering',sw:'ST (wheel)'},{ch:'CH2',func:'Throttle / ESC',sw:'TH (trigger) + launch logic'}];
+    if(f.parachute)    m.push({ch:'CH3',func:'Parachute Deploy',sw:'SC (momentary)'});
+    if(f.burnout_mode) m.push({ch:'CH4',func:'Drive Mode Flag',sw:'SA (3-pos)'});
+    return m;
+  }
+  return [];
+}
+
+function generateCrawlerYAML(name,f){
+  const L=[];
+  L.push(`semver: 2.11.4\nheader:\n  name: ${name}\n  bitmap: ""\n  labels: ""\nnoGlobalFunctions: 0\nthrTrim: 0\nextendedLimits: 0\nextendedTrims: 0\nthrottleReversed: 0`);
+  L.push(`flightModeData:\n  0:\n    name: Normal\n    fadeIn: 0\n    fadeOut: 0`);
+  if(f.creep_mode){L.push(`  1:\n    swtch: SA1\n    name: Crawl\n    fadeIn: 0\n    fadeOut: 0`);L.push(`  2:\n    swtch: SA2\n    name: Creep\n    fadeIn: 0\n    fadeOut: 0`);}
+  L.push(`mixData:`);
+  L.push(`  - destCh: 0\n    srcRaw: I0\n    weight: ${f.reverse_steering?-100:100}\n    swtch: NONE\n    mltpx: ADD\n    flightModes: 000000000\n    name: Steering`);
+  L.push(`  - destCh: 1\n    srcRaw: I1\n    weight: 100\n    swtch: NONE\n    mltpx: ADD\n    flightModes: 000000000\n    name: Throttle`);
+  if(f.creep_mode){L.push(`  - destCh: 1\n    srcRaw: MAX\n    weight: 60\n    swtch: NONE\n    mltpx: REPL\n    flightModes: 101111111\n    name: Crawl Cap`);L.push(`  - destCh: 1\n    srcRaw: MAX\n    weight: 25\n    swtch: NONE\n    mltpx: REPL\n    flightModes: 110111111\n    name: Creep Cap`);}
+  if(f.four_wheel_steering){L.push(`  - destCh: 2\n    srcRaw: I0\n    weight: 100\n    swtch: L1\n    mltpx: ADD\n    flightModes: 000000000\n    name: Rear Steer`);L.push(`  - destCh: 2\n    srcRaw: I0\n    weight: -100\n    swtch: L3\n    mltpx: REPL\n    flightModes: 000000000\n    name: Crab Mode`);}
+  if(f.winch){L.push(`  - destCh: 3\n    srcRaw: SB\n    weight: 100\n    swtch: L4\n    mltpx: ADD\n    flightModes: 000000000\n    name: Winch`);L.push(`  - destCh: 1\n    srcRaw: MAX\n    weight: 0\n    swtch: L5\n    mltpx: REPL\n    flightModes: 000000000\n    name: Winch Safety`);}
+  L.push(`expoData:\n  - srcRaw: ST\n    mode: 3\n    chn: 0\n    weight: 100\n    offset: 0\n    curve:\n      type: 1\n      value: 0\n  - srcRaw: TH\n    mode: 3\n    chn: 1\n    weight: 100\n    offset: 0\n    curve:\n      type: 1\n      value: 0`);
+  L.push(`inputNames:\n  0:\n    val: Str\n  1:\n    val: TH`);
+  if(f.four_wheel_steering)L.push(`  2:\n    val: 4WS`);
+  L.push(`logicalSw:`);
+  if(f.four_wheel_steering){L.push(`  0:\n    func: FUNC_VPOS\n    def: SB,1\n    andsw: NONE\n    lsPersist: 0`);L.push(`  1:\n    func: FUNC_VPOS\n    def: SC,1\n    andsw: NONE\n    lsPersist: 0`);L.push(`  2:\n    func: FUNC_VPOS\n    def: SB,2\n    andsw: NONE\n    lsPersist: 0`);}
+  if(f.winch){const i=f.four_wheel_steering?3:0;L.push(`  ${i}:\n    func: FUNC_VPOS\n    def: SD,1\n    andsw: NONE\n    lsPersist: 0`);}
+  L.push(`thrTraceSrc: TH\nswitchWarning:\n  SA:\n    pos: up`);
+  if(f.winch)L.push(`  SD:\n    pos: up`);
+  L.push(`modelRegistrationID: MT12`);
+  return L.join('\n');
+}
+
+function generateDragYAML(name,f){
+  const L=[];
+  L.push(`semver: 2.11.4\nheader:\n  name: ${name}\n  bitmap: ""\n  labels: ""\nnoGlobalFunctions: 0\nthrTrim: 0`);
+  L.push(`flightModeData:\n  0:\n    name: Launch\n    fadeIn: 0\n    fadeOut: 0`);
+  if(f.burnout_mode){L.push(`  1:\n    swtch: SA1\n    name: Stage\n    fadeIn: 0\n    fadeOut: 0`);L.push(`  2:\n    swtch: SA2\n    name: WarmUp\n    fadeIn: 0\n    fadeOut: 0`);}
+  L.push(`mixData:\n  - destCh: 0\n    srcRaw: I0\n    weight: 100\n    swtch: NONE\n    mltpx: ADD\n    flightModes: 000000000\n    name: ""\n  - destCh: 1\n    srcRaw: I1\n    weight: 100\n    swtch: NONE\n    mltpx: ADD\n    flightModes: 000000000\n    name: ""`);
+  if(f.launch_control){L.push(`  - destCh: 1\n    srcRaw: MAX\n    weight: 25\n    swtch: L2\n    mltpx: REPL\n    speedUp: 10\n    flightModes: 011111111\n    name: ""`);L.push(`  - destCh: 1\n    srcRaw: MAX\n    weight: 75\n    swtch: L3\n    mltpx: REPL\n    speedUp: 10\n    flightModes: 011111111\n    name: ""`);L.push(`  - destCh: 1\n    srcRaw: MAX\n    weight: 70\n    swtch: L3\n    mltpx: REPL\n    flightModes: 101111111\n    name: Prep`);L.push(`  - destCh: 1\n    srcRaw: MAX\n    weight: 15\n    swtch: L3\n    mltpx: REPL\n    flightModes: 110111111\n    name: Stage`);}
+  L.push(`expoData:\n  - srcRaw: ST\n    scale: 0\n    mode: 3\n    chn: 0\n    swtch: NONE\n    flightModes: 000000000\n    weight: 100\n    offset: 0\n    curve:\n      type: 1\n      value: 0\n    trimSource: 0\n    name: ""\n  - srcRaw: TH\n    scale: 0\n    mode: 3\n    chn: 1\n    swtch: NONE\n    flightModes: 000000000\n    weight: 100\n    offset: 0\n    curve:\n      type: 1\n      value: 0\n    trimSource: 0\n    name: ""`);
+  L.push(`inputNames:\n  0:\n    val: St\n  1:\n    val: TH`);
+  if(f.launch_control){L.push(`logicalSw:\n  0:\n    func: FUNC_VPOS\n    def: I1,5\n    delay: 0\n    duration: 0\n    andsw: SC2\n    lsPersist: 0\n    lsState: 0\n  1:\n    func: FUNC_STICKY\n    def: L1,NONE\n    delay: 0\n    duration: 10\n    andsw: L1\n    lsPersist: 0\n    lsState: 0\n  2:\n    func: FUNC_STICKY\n    def: L1,NONE\n    delay: 10\n    duration: 10\n    andsw: L1\n    lsPersist: 0\n    lsState: 0\n  3:\n    func: FUNC_STICKY\n    def: SD2,SD2\n    delay: 0\n    duration: 0\n    andsw: NONE\n    lsPersist: 0\n    lsState: 0`);L.push(`customFn:\n  0:\n    swtch: "!L4"\n    func: OVERRIDE_CHANNEL\n    def: 1,0,1\n  1:\n    swtch: "!L4"\n    func: RGB_LED\n    def: red,1,On\n  2:\n    swtch: L4\n    func: RGB_LED\n    def: green,1,On`);}
+  L.push(`thrTraceSrc: TH\nswitchWarning:\n  SA:\n    pos: up\nmodelRegistrationID: MT12`);
+  return L.join('\n');
+}
+
+function generateYAML(v,name,f){
+  const n=name.replace(/[^a-zA-Z0-9 _-]/g,'');
+  if(v==='Rock Crawler') return generateCrawlerYAML(n,f);
+  if(v==='Drag Racer')   return generateDragYAML(n,f);
+  return '# Template not yet available';
+}
+
+function goTo(step){
+  state.modelName=document.getElementById('modelName').value||state.vehicle;
+  if(step===2)renderFeatures();
+  if(step===3)renderReview();
+  if(step===4)renderOutput();
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===step));
+  document.querySelectorAll('.step-seg').forEach((s,i)=>{
+    s.classList.remove('active','done');
+    if(i<step)s.classList.add('done');
+    if(i===step)s.classList.add('active');
+  });
+  window.scrollTo(0,0);
+}
+
+function selectVehicle(el){
+  if(el.classList.contains('unavailable'))return;
+  document.querySelectorAll('.vehicle-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.vehicle=el.dataset.vehicle; state.features={};
+  document.getElementById('modelName').value=state.vehicle;
+  state.modelName=state.vehicle;
+}
+
+function selectRadio(el){
+  if(el.classList.contains('unavailable'))return;
+  document.querySelectorAll('.radio-item').forEach(r=>r.classList.remove('selected'));
+  el.classList.add('selected'); state.radio=el.dataset.radio;
+}
+
+function renderFeatures(){
+  const features=FEATURES[state.vehicle]||[];
+  features.forEach(f=>{if(state.features[f.id]===undefined)state.features[f.id]=f.default;});
+  const c=document.getElementById('featureContainer');
+  c.innerHTML='';
+  const list=document.createElement('div');
+  list.className='feature-list';
+  features.forEach(f=>{
+    const item=document.createElement('div');
+    item.className='feature-item'+(state.features[f.id]?' active':'');
+    item.onclick=()=>{state.features[f.id]=!state.features[f.id];item.classList.toggle('active',state.features[f.id]);};
+    item.innerHTML=`<div class="toggle"></div><div class="feature-info"><div class="feature-name">${f.name}</div><div class="feature-desc">${f.desc}</div><div class="feature-why">⚡ WHY: ${f.why}</div></div>`;
+    list.appendChild(item);
+  });
+  c.appendChild(list);
+}
+
+function renderReview(){
+  const active=Object.entries(state.features).filter(([,v])=>v).map(([k])=>k);
+  const ch=getChannelMap(state.vehicle,state.features);
+  document.getElementById('reviewContent').innerHTML=`
+    <div class="summary-grid">
+      <div class="summary-block"><div class="summary-label">// VEHICLE</div><div class="summary-value">${state.vehicle}</div></div>
+      <div class="summary-block"><div class="summary-label">// RADIO</div><div class="summary-value">MT12</div></div>
+      <div class="summary-block"><div class="summary-label">// MODEL NAME</div><div class="summary-value">${state.modelName}</div></div>
+      <div class="summary-block"><div class="summary-label">// FEATURES ACTIVE</div><div class="summary-value">${active.length} / ${Object.keys(state.features).length}</div></div>
+    </div>
+    <div class="section-label">ACTIVE FEATURES</div>
+    <div class="feature-pills">${active.map(f=>`<span class="pill">${f.replace(/_/g,' ').toUpperCase()}</span>`).join('')}</div>
+    <div class="section-label" style="margin-top:18px;">CHANNEL MAP</div>
+    <div class="ch-map">${ch.map(c=>`<div class="ch-row"><span class="ch-num">${c.ch}</span><span class="ch-func">${c.func}</span><span class="ch-switch">${c.sw}</span></div>`).join('')}</div>`;
+}
+
+function renderOutput(){
+  document.getElementById('yamlOutput').textContent=generateYAML(state.vehicle,state.modelName,state.features);
+  document.getElementById('statusText').textContent=`${state.modelName}.yml — ready to import into EdgeTX Companion`;
+}
+
+function downloadYml(){
+  const blob=new Blob([document.getElementById('yamlOutput').textContent],{type:'text/yaml'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`${state.modelName.replace(/\s+/g,'_')}.yml`;
+  a.click();
+}
+
+FEATURES['Rock Crawler'].forEach(f=>{state.features[f.id]=f.default;});
+</script>
+</body>
+</html>

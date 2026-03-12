@@ -1,11 +1,12 @@
-.stfolder/
-.stfolder.removed-*/
 __pycache__/
 *.pyc
+*.pyo
+*.zip
+*.rar
+.stfolder
+.stfolder*/
+.stversions/
+~syncthing~*
+output/
+RoosTx/
 new 1.txt
-001 AI_TEAM/
-001 RoosTx Application Idea/
-003 SORT/
-005 Screenshots/
-ARCHIVE/
-RoosTx.zip

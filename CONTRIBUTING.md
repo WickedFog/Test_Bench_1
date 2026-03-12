@@ -23,7 +23,7 @@ RoosTx is a structured, layered project. Before touching anything, read this.
 
 These are hard constraints. Violating them breaks real hardware.
 
-- `CH6 / SD` is the factory standard for throttle lockout. Reassignment requires explicit justification and Grok verification. (Pending: confirm whether lockout activates on button UP or DOWN.)
+- `CH6 / SD` is the factory standard for throttle lockout. Reassignment requires explicit justification. **Confirmed:** lockout activates on button DOWN (pressed), releases on UP.
 - `SB`, `SC`, `SD` are **MOMENTARY** switches. They do not have a "2" position.
 - `SC2`, `SD2`, `SB2` **do not exist** on the MT12. Do not reference them.
 - Channel map: `CH1:ST CH2:TH CH3:SA CH4:SB CH5:SC CH6:SD CH7:S1 CH8:S2 CH9:FL1 CH10:FL2`
@@ -73,11 +73,12 @@ No layer gets locked without Kevin's sign-off. No design decision is final until
 
 ## Known Open Issues
 
-1. `model.py` — `expoData` outputs empty `[]`
-2. `model.py` — `inputNames` outputs empty `{}`
-3. `model.py` — semver shows `2.11.4`, should be `2.11.3`
-4. `drag_race_template.py` — needs full redesign
-5. Vehicle taxonomy — needs correction throughout codebase
+1. ~~`model.py` — `expoData` outputs empty `[]`~~ ✅ Fixed
+2. ~~`model.py` — `inputNames` outputs empty `{}`~~ ✅ Fixed
+3. ~~`model.py` — semver shows `2.11.4`, should be `2.11.3`~~ ✅ Fixed
+4. ~~`drag_race_template.py` — `SC2`/`SD2` invalid switch references~~ ✅ Fixed to `SC1`/`SD1`
+5. `drag_race_template.py` — needs full redesign
+6. Vehicle taxonomy — needs correction throughout codebase
 
 ---
 

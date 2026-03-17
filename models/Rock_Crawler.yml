@@ -1,4 +1,4 @@
-semver: 2.11.3
+﻿semver: 2.11.4
 header:
   name: Rock Crawler
   bitmap: ""
@@ -22,25 +22,25 @@ flightModeData:
     name: Crawl
     fadeIn: 0
     fadeOut: 0
-# ─────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # CHANNEL MAP (MT12 hardware)
-#   CH1 (ST)  – Front Steering servo
-#   CH2 (TH)  – Throttle / ESC
-#   CH3 (SA)  – Winch ESC  (SA0-up=reel-in | SA1-mid=stop | SA2-dn=reel-out)
-#   CH4 (SB)  – 2-Speed servo (hold SB = high gear; release = low gear)
-#   CH5 (SC)  – Dig unit servo/relay (hold SC = dig engaged)
-#   CH6 (SD)  – RESERVED — never assigned
-#   CH7 (S1)  – Rear Steering servo  (S1 knob scales rear travel via expoData I2)
-#   CH8 (S2)  – unassigned           (S2 knob scales front travel via expoData I3)
+#   CH1 (ST)  â€“ Front Steering servo
+#   CH2 (TH)  â€“ Throttle / ESC
+#   CH3 (SA)  â€“ Winch ESC  (SA0-up=reel-in | SA1-mid=stop | SA2-dn=reel-out)
+#   CH4 (SB)  â€“ 2-Speed servo (hold SB = high gear; release = low gear)
+#   CH5 (SC)  â€“ Dig unit servo/relay (hold SC = dig engaged)
+#   CH6 (SD)  â€“ RESERVED â€” never assigned
+#   CH7 (S1)  â€“ Rear Steering servo  (S1 knob scales rear travel via expoData I2)
+#   CH8 (S2)  â€“ unassigned           (S2 knob scales front travel via expoData I3)
 #
 # 4WS MODE SELECTION (FL1/FL2 two-position switches)
-#   FL1=off FL2=off → Normal    (both axles counter-steer, 75% travel)
-#   FL1=on  FL2=off → Front-Only (rear locked center) ← L1
-#   FL1=off FL2=on  → Rear-Only  (front locked center) ← L2
-#   FL1=on  FL2=on  → Crab       (both steer same direction) ← L3
-# ─────────────────────────────────────────────────────────────
+#   FL1=off FL2=off â†’ Normal    (both axles counter-steer, 75% travel)
+#   FL1=on  FL2=off â†’ Front-Only (rear locked center) â† L1
+#   FL1=off FL2=on  â†’ Rear-Only  (front locked center) â† L2
+#   FL1=on  FL2=on  â†’ Crab       (both steer same direction) â† L3
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 mixData:
-  # ── CH1: Front Steering ──────────────────────────────────
+  # â”€â”€ CH1: Front Steering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   - destCh: 0
     srcRaw: I0
     weight: 75
@@ -80,7 +80,7 @@ mixData:
     flightModes: 000000000
     offset: 0
     name: RrOnly
-  # ── CH2: Throttle ─────────────────────────────────────────
+  # â”€â”€ CH2: Throttle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   - destCh: 1
     srcRaw: I1
     weight: 100
@@ -100,7 +100,7 @@ mixData:
     flightModes: 000000000
     offset: 0
     name: ""
-  # ── CH3: Winch (SA 3-position) ────────────────────────────
+  # â”€â”€ CH3: Winch (SA 3-position) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   - destCh: 2
     srcRaw: SA
     weight: 100
@@ -120,7 +120,7 @@ mixData:
     flightModes: 000000000
     offset: 0
     name: Winch
-  # ── CH4: 2-Speed Transmission (SB momentary) ─────────────
+  # â”€â”€ CH4: 2-Speed Transmission (SB momentary) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   # Default: low gear (-100)
   - destCh: 3
     srcRaw: MAX
@@ -161,7 +161,7 @@ mixData:
     flightModes: 000000000
     offset: 0
     name: HiGear
-  # ── CH5: Dig Unit (SC momentary) ─────────────────────────
+  # â”€â”€ CH5: Dig Unit (SC momentary) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   # Default: disengaged (-100)
   - destCh: 4
     srcRaw: MAX
@@ -202,8 +202,8 @@ mixData:
     flightModes: 000000000
     offset: 0
     name: DigOn
-  # ── CH6 (SD): RESERVED — intentionally omitted ───────────
-  # ── CH7: Rear Steering (4WS) ──────────────────────────────
+  # â”€â”€ CH6 (SD): RESERVED â€” intentionally omitted â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  # â”€â”€ CH7: Rear Steering (4WS) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   # Base: counter-steer (inverted, 75%)
   - destCh: 6
     srcRaw: I0
@@ -265,7 +265,7 @@ mixData:
     offset: 0
     name: FrOnly
 expoData:
-  # I0 – Front Steering stick
+  # I0 â€“ Front Steering stick
   - srcRaw: ST
     scale: 0
     mode: 3
@@ -279,7 +279,7 @@ expoData:
       value: 0
     trimSource: 0
     name: ""
-  # I1 – Throttle stick
+  # I1 â€“ Throttle stick
   - srcRaw: TH
     scale: 0
     mode: 3
@@ -293,7 +293,7 @@ expoData:
       value: 0
     trimSource: 0
     name: ""
-  # I2 – S1 knob (front axle steering travel trim)
+  # I2 â€“ S1 knob (front axle steering travel trim)
   # NOTE: Full GV-based travel scaling wired by the Python generator.
   # Defined here so Companion labels the input correctly.
   - srcRaw: S1
@@ -309,7 +309,7 @@ expoData:
       value: 0
     trimSource: 0
     name: ""
-  # I3 – S2 knob (rear axle steering travel trim)
+  # I3 â€“ S2 knob (rear axle steering travel trim)
   - srcRaw: S2
     scale: 0
     mode: 3
@@ -332,13 +332,13 @@ inputNames:
     val: FrTrm
   3:
     val: RrTrm
-# ─────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # LOGICAL SWITCHES
-#   L1 – Front-Only mode  (FL1=on,  FL2=off)
-#   L2 – Rear-Only mode   (FL1=off, FL2=on)
-#   L3 – Crab mode        (FL1=on,  FL2=on)
+#   L1 â€“ Front-Only mode  (FL1=on,  FL2=off)
+#   L2 â€“ Rear-Only mode   (FL1=off, FL2=on)
+#   L3 â€“ Crab mode        (FL1=on,  FL2=on)
 #   Normal mode requires no LS; active when L1/L2/L3 are all false.
-# ─────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 logicalSw:
   0:
     func: FUNC_AND
@@ -408,3 +408,4 @@ modelLSDisabled: GLOBAL
 modelSFDisabled: GLOBAL
 modelCustomScriptsDisabled: GLOBAL
 modelTelemetryDisabled: GLOBAL
+

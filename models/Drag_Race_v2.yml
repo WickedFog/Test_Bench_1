@@ -1,4 +1,4 @@
-semver: 2.11.3
+﻿semver: 2.11.4
 header:
   name: Drag Race
   bitmap: ""
@@ -17,35 +17,35 @@ extendedLimits: 0
 extendedTrims: 0
 throttleReversed: 0
 checklistInteractive: 0
-# ─────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # CHANNEL MAP (MT12 hardware)
-#   CH1 (ST)  – Steering
-#   CH2 (TH)  – Throttle / ESC
-#   CH3 (SA)  – Drive Mode selector (SA=ROLE_DRIVE_MODE)
-#   CH5 (SC)  – Transbrake (momentary hold=engaged, release=launch)
-#   CH6 (SD)  – RESERVED — factory throttle lockout, never assigned
-#   CH7 (S1)  – Throttle cap / power level knob
-#   CH8 (S2)  – Ramp rate / timing knob
+#   CH1 (ST)  â€“ Steering
+#   CH2 (TH)  â€“ Throttle / ESC
+#   CH3 (SA)  â€“ Drive Mode selector (SA=ROLE_DRIVE_MODE)
+#   CH5 (SC)  â€“ Transbrake (momentary hold=engaged, release=launch)
+#   CH6 (SD)  â€“ RESERVED â€” factory throttle lockout, never assigned
+#   CH7 (S1)  â€“ Throttle cap / power level knob
+#   CH8 (S2)  â€“ Ramp rate / timing knob
 #
 # SA POSITIONS (Drive Mode)
-#   SA0 (up)  = Burnout  → FM0
-#   SA1 (mid) = Stage    → FM1
-#   SA2 (dn)  = Race     → FM2
+#   SA0 (up)  = Burnout  â†’ FM0
+#   SA1 (mid) = Stage    â†’ FM1
+#   SA2 (dn)  = Race     â†’ FM2
 #
 # LAUNCH SEQUENCE
-#   1. SA to Burnout (SA0) — L4 red, throttle locked
+#   1. SA to Burnout (SA0) â€” L4 red, throttle locked
 #   2. Rev motor; SA to Stage (SA1)
-#   3. Hold SC (transbrake) + throttle up → L1 fires → L2/L3/L4 arm
-#   4. SA to Race (SA2) — L4 green, throttle override lifts
-#   5. Release SC → launch
-#   6. SA back to Burnout (SA0) → L4 resets → red
+#   3. Hold SC (transbrake) + throttle up â†’ L1 fires â†’ L2/L3/L4 arm
+#   4. SA to Race (SA2) â€” L4 green, throttle override lifts
+#   5. Release SC â†’ launch
+#   6. SA back to Burnout (SA0) â†’ L4 resets â†’ red
 #
 # THROTTLE LOGIC (override / caps by flight mode)
-#   !L4 active → CH2 forced to 0 (customFn OVERRIDE)
-#   FM0 (Burnout), L2 → cap 25%, speed ramp 10
-#   FM0 (Burnout), L3 → cap 75%, speed ramp 10
-#   FM1 (Stage),   L3 → cap 70%
-#   FM2 (Race),    L3 → cap 15% (staging creep before release)
+#   !L4 active â†’ CH2 forced to 0 (customFn OVERRIDE)
+#   FM0 (Burnout), L2 â†’ cap 25%, speed ramp 10
+#   FM0 (Burnout), L3 â†’ cap 75%, speed ramp 10
+#   FM1 (Stage),   L3 â†’ cap 70%
+#   FM2 (Race),    L3 â†’ cap 15% (staging creep before release)
 #
 # GV INTEGRATION (wired by Python generator)
 #   GV1 = burnout cap    GV2 = staging cap
@@ -54,7 +54,7 @@ checklistInteractive: 0
 # LED
 #   Red  = !L4 (disarmed)
 #   Green = L4 (armed / launch active)
-# ─────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 flightModeData:
   0:
     name: Burnout
@@ -71,7 +71,7 @@ flightModeData:
     fadeIn: 0
     fadeOut: 0
 mixData:
-  # ── CH1: Steering ─────────────────────────────────────────
+  # â”€â”€ CH1: Steering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   - destCh: 0
     srcRaw: I0
     weight: 100
@@ -91,7 +91,7 @@ mixData:
     flightModes: 000000000
     offset: 0
     name: ""
-  # ── CH2: Throttle ─────────────────────────────────────────
+  # â”€â”€ CH2: Throttle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   # Base pass-through (overridden to 0 by customFn when !L4)
   - destCh: 1
     srcRaw: I1
@@ -112,7 +112,7 @@ mixData:
     flightModes: 000000000
     offset: 0
     name: ""
-  # FM0 (Burnout): L2 active → ramp to 25% burnout cap
+  # FM0 (Burnout): L2 active â†’ ramp to 25% burnout cap
   - destCh: 1
     srcRaw: MAX
     weight: 25
@@ -132,7 +132,7 @@ mixData:
     flightModes: 011111111
     offset: 0
     name: ""
-  # FM0 (Burnout): L3 active → ramp to 75% burnout cap
+  # FM0 (Burnout): L3 active â†’ ramp to 75% burnout cap
   - destCh: 1
     srcRaw: MAX
     weight: 75
@@ -152,7 +152,7 @@ mixData:
     flightModes: 011111111
     offset: 0
     name: ""
-  # FM1 (Stage): L3 active → 70% staging cap
+  # FM1 (Stage): L3 active â†’ 70% staging cap
   - destCh: 1
     srcRaw: MAX
     weight: 70
@@ -172,7 +172,7 @@ mixData:
     flightModes: 101111111
     offset: 0
     name: Prep
-  # FM2 (Race): L3 active → 15% staging creep cap
+  # FM2 (Race): L3 active â†’ 15% staging creep cap
   - destCh: 1
     srcRaw: MAX
     weight: 15
@@ -193,7 +193,7 @@ mixData:
     offset: 0
     name: Stage
 expoData:
-  # I0 – Steering
+  # I0 â€“ Steering
   - srcRaw: ST
     scale: 0
     mode: 3
@@ -207,7 +207,7 @@ expoData:
       value: 0
     trimSource: 0
     name: ""
-  # I1 – Throttle
+  # I1 â€“ Throttle
   - srcRaw: TH
     scale: 0
     mode: 3
@@ -226,15 +226,15 @@ inputNames:
     val: St
   1:
     val: TH
-# ─────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # LOGICAL SWITCHES
-#   L1 – Armed condition: throttle>5% AND transbrake held (SC1)
-#          FIX: was andsw:SC2 — SC has no position 2 (momentary)
-#   L2 – STICKY: latches when L1 fires; active for 10s; gated by L1
-#   L3 – STICKY: 10s delay then 10s duration; gated by L1
-#   L4 – STICKY: arm latch; sets on L2; CLEARS when SA returns to Burnout (SA0)
-#          FIX: was def:SD2,SD2 — SD is RESERVED, SD2 does not exist
-# ─────────────────────────────────────────────────────────────
+#   L1 â€“ Armed condition: throttle>5% AND transbrake held (SC1)
+#          FIX: was andsw:SC2 â€” SC has no position 2 (momentary)
+#   L2 â€“ STICKY: latches when L1 fires; active for 10s; gated by L1
+#   L3 â€“ STICKY: 10s delay then 10s duration; gated by L1
+#   L4 â€“ STICKY: arm latch; sets on L2; CLEARS when SA returns to Burnout (SA0)
+#          FIX: was def:SD2,SD2 â€” SD is RESERVED, SD2 does not exist
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 logicalSw:
   0:
     func: FUNC_VPOS
@@ -325,3 +325,4 @@ modelLSDisabled: GLOBAL
 modelSFDisabled: GLOBAL
 modelCustomScriptsDisabled: GLOBAL
 modelTelemetryDisabled: GLOBAL
+

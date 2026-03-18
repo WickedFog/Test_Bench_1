@@ -1,5 +1,5 @@
-"""
-roosTx/model.py  v0.5  —  Companion-compatible YAML output
+﻿"""
+roosTx/model.py  v0.5  â€”  Companion-compatible YAML output
 """
 
 import yaml
@@ -8,14 +8,14 @@ import re
 from pathlib import Path
 
 
-# ── Custom Dumper — fixes list indentation to match Companion format ──────────
+# â”€â”€ Custom Dumper â€” fixes list indentation to match Companion format â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class IndentDumper(yaml.Dumper):
     def increase_indent(self, flow=False, indentless=False):
         return super().increase_indent(flow=flow, indentless=False)
 
 
-# ── Custom Dumper for bare scalars and flightModes ───────────────────────────
+# â”€â”€ Custom Dumper for bare scalars and flightModes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 _BARE_RE = re.compile(r'^(?:[01]{9}|OFF|ON|GLOBAL|WARN_OFF|WARN_ON|JOYSTICK|JOYSTICK_EXT|none)$')
 
@@ -36,17 +36,17 @@ def no_quote_flight_modes(dumper, data):
 CompanionDumper.add_representer(str, no_quote_flight_modes)
 
 
-# ── Default model skeleton ────────────────────────────────────────────────────
+# â”€â”€ Default model skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 DEFAULT_MODEL = {
-    "semver": "2.11.3",
+    "semver": "2.11.4",
     "header": {"name": "New Model", "bitmap": "", "labels": ""},
     "noGlobalFunctions": 0, "thrTrim": 0, "trimInc": 0, "displayTrims": 0,
     "ignoreSensorIds": 0, "showInstanceIds": 0, "disableThrottleWarning": 0,
     "enableCustomThrottleWarning": 0, "customThrottleWarningPosition": 0,
     "beepANACenter": 0, "extendedLimits": 0, "extendedTrims": 0,
     "throttleReversed": 0, "checklistInteractive": 0,
-    "flightModeData": {}, "mixData": [], "expoData": [],
+    "flightModeData": {}, "mixData": [], "expoData": [], "curves": {},
     "inputNames": {}, "logicalSw": {}, "customFn": {},
     "thrTraceSrc": "TH", "switchWarning": {},
     "thrTrimSw": 0, "potsWarnMode": "WARN_OFF", "potsWarnEnabled": 0,
@@ -130,17 +130,16 @@ class EdgeTXModel:
         mix.update(kwargs)
         self._data["mixData"].append(mix)
 
-    def add_logical_switch(self, idx, func, def1, and_switch="", delay=0, duration=0):
+    def add_logical_switch(self, idx, func, def1, and_switch="NONE", delay=0, duration=0):
         ls = {
             "func": func,
             "def": def1,
+            "andsw": and_switch,
+            "delay": delay,
+            "duration": duration,
+            "lsPersist": 0,
+            "lsState": 0,
         }
-        if and_switch:
-            ls["andsw"] = and_switch
-        if delay:
-            ls["delay"] = delay
-        if duration:
-            ls["duration"] = duration
         self._data["logicalSw"][str(idx)] = ls
 
     def add_custom_fn(self, idx, swtch, func, def_str):
@@ -151,6 +150,17 @@ class EdgeTXModel:
         }
         self._data["customFn"][str(idx)] = cf
 
+
+    def add_curve(self, idx, name, points, smooth=0):
+        """Add a named curve. points = list of Y values.
+        2 points = linear (type 0), 3 points = type 1, 5 points = type 2."""
+        curve_types = {2: 0, 3: 1, 5: 2}
+        self._data["curves"][str(idx)] = {
+            "name": name,
+            "type": curve_types.get(len(points), 0),
+            "smooth": smooth,
+            "points": points,
+        }
     def set_throttle_trace(self, src):
         self._data["thrTraceSrc"] = src
 
@@ -175,7 +185,7 @@ class EdgeTXModel:
         print(f"{'='*55}")
 
         fm = d.get("flightModeData", {})
-        print(f"\n  Flight Mode ({len(fm)}):")
+        print(f"\n  Drive Mode ({len(fm)}):")
         for idx, mode in fm.items():
             print(f"    [{idx}] {mode['name']:15s}  switch={mode.get('swtch','DEFAULT')}")
 
@@ -210,12 +220,15 @@ class EdgeTXModel:
         print()
 
 
-# ── Helper factories ──────────────────────────────────────────────────────────
+# â”€â”€ Helper factories â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def make_flight_mode(name, switch="", fade_in=0, fade_out=0):
-    """Always put swtch BEFORE name — matches Companion field order."""
+    """Always put swtch BEFORE name â€” matches Companion field order."""
     fm = {"fadeIn": fade_in, "fadeOut": fade_out}
     if switch and switch != "NONE":
         fm["swtch"] = switch
     fm["name"] = name
     return fm
+
+
+

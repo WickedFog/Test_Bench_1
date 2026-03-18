@@ -107,8 +107,8 @@ def build(name="Drag Race", reg_id="MT12", radio_map=None):
     m.set_switch_warning(ms, "up")
 
     # ── Inputs ────────────────────────────────────────────────────────────────
-    m.add_input(0, "ST", name="Whl")    # Steering Wheel
-    m.add_input(1, "TH", name="Trig")   # Throttle Trigger
+    m.add_input(0, "ST", name="Whl",  weight=100, offset=0, curve_type=1, curve_value=0)   # Steering Wheel - straight ramp
+    m.add_input(1, "TH", name="Trig", weight=100, offset=0, curve_type=1, curve_value=0)  # Throttle Trigger - straight ramp
 
     # ── Mixes ─────────────────────────────────────────────────────────────────
     # flightModes bitmask: 9 digits, position 0=DM0 / 1=DM1 / 2=DM2 / rest=unused
@@ -192,6 +192,14 @@ def build(name="Drag Race", reg_id="MT12", radio_map=None):
     # LED: Green = SD dn (armed)
     m.add_custom_fn(3, f"{ms}1", "RGB_LED", "green,1,On")
 
+    # ── Curves (straight line placeholders -- Kevin to dial in sine curves) ──
+    # 2-point curves: [y at x=-100, y at x=+100]
+    # Throttle context: x=-100=no input, x=+100=full trigger
+    m.add_curve(0, "Burnout",  [-100, 60,  80])   # starts 60%, ramps to 80%
+    m.add_curve(1, "Stg1",    [-100,  0,  50])    # 0% to Stage 2 start (50%)
+    m.add_curve(2, "Stg2",    [-100, 50,  75])    # 50% to Stage 3 start (75%)
+    m.add_curve(3, "Stg3",    [-100, 75, 100])    # 75% to full
+
     # ── Throttle trace ─────────────────────────────────────────────────────────
     m.set_throttle_trace("TH")
 
@@ -209,3 +217,6 @@ if __name__ == "__main__":
     model.describe()
     model.save("output/Drag_Race_RoosTx.yml")
     print("Done. Import output/Drag_Race_RoosTx.yml into Companion to verify.")
+
+
+

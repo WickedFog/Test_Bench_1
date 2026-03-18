@@ -23,15 +23,15 @@ flightModeData:
     fadeIn: 0
     fadeOut: 0
   1:
+    swtch: SA-
     name: Stage
     fadeIn: 0
     fadeOut: 0
-    swtch: SA1
   2:
+    swtch: "SA\u2193"
     name: Burnout
     fadeIn: 0
     fadeOut: 0
-    swtch: SA2
 mixData:
 - destCh: 0
   srcRaw: I0
@@ -51,7 +51,7 @@ mixData:
   mixWarn: 0
   flightModes: '000000000'
   offset: 0
-  name: ''
+  name: Steering
 - destCh: 1
   srcRaw: I1
   weight: 100
@@ -68,13 +68,13 @@ mixData:
   carryTrim: 0
   mltpx: ADD
   mixWarn: 0
-  flightModes: '000000000'
+  flightModes: '011111111'
   offset: 0
-  name: ''
+  name: TH Race base
 - destCh: 1
   srcRaw: MAX
-  weight: 25
-  swtch: L2
+  weight: 50
+  swtch: NONE
   curve:
     type: 0
     value: 0
@@ -82,18 +82,18 @@ mixData:
   delayUp: 0
   delayDown: 0
   speedPrec: 0
-  speedUp: 10
+  speedUp: 5
   speedDown: 0
   carryTrim: 0
   mltpx: REPL
   mixWarn: 0
   flightModes: '101111111'
   offset: 0
-  name: ''
+  name: Stage Curve1
 - destCh: 1
   srcRaw: MAX
-  weight: 75
-  swtch: L3
+  weight: 25
+  swtch: "SC\u2193"
   curve:
     type: 0
     value: 0
@@ -101,14 +101,33 @@ mixData:
   delayUp: 0
   delayDown: 0
   speedPrec: 0
-  speedUp: 10
+  speedUp: 0
+  speedDown: 0
+  carryTrim: 0
+  mltpx: REPL
+  mixWarn: 0
+  flightModes: '101111111'
+  offset: 0
+  name: Stage Curve2 SC
+- destCh: 1
+  srcRaw: MAX
+  weight: 80
+  swtch: NONE
+  curve:
+    type: 0
+    value: 0
+  delayPrec: 0
+  delayUp: 0
+  delayDown: 0
+  speedPrec: 0
+  speedUp: 0
   speedDown: 0
   carryTrim: 0
   mltpx: REPL
   mixWarn: 0
   flightModes: '110111111'
   offset: 0
-  name: ''
+  name: Burnout cap 80pct
 expoData:
 - srcRaw: ST
   scale: 0
@@ -184,7 +203,7 @@ logicalSw:
     def: I1,5
     delay: 0
     duration: 0
-    andsw: SC↓
+    andsw: "SC\u2193"
     lsPersist: 0
     lsState: 0
   1:
@@ -205,25 +224,25 @@ logicalSw:
     lsState: 0
   3:
     func: FUNC_STICKY
-    def: SA2,SA0
+    def: "SA\u2193,SA\u2191"
     delay: 0
     duration: 0
     andsw: NONE
     lsPersist: 0
     lsState: 0
 customFn:
-- swtch: '!L4'
+- swtch: "SD\u2191"
   func: OVERRIDE_CHANNEL
   def: 1,0,1
-- swtch: '!L4'
+- swtch: "SD\u2191"
   func: RGB_LED
   def: red,1,On
-- swtch: L4
+- swtch: "SD\u2193"
   func: RGB_LED
   def: green,1,On
 thrTraceSrc: TH
 switchWarning:
-  SA:
+  SD:
     pos: up
 thrTrimSw: 0
 potsWarnMode: WARN_OFF

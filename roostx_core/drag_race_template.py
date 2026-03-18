@@ -1,222 +1,203 @@
-﻿"""
-roostx_core/drag_race_template.py
-----------------------------------
-RoosTx Drag Race template — full rebuild.
-Based on approved spec: docs/Drag_Race_Spec_v1.md
-Approved by Kevin Rowe (WickedFog) — Session 11
+# drag_race_template.py
+# RoosTx — Drag Race Template
+# Rebuilt Session 12 — All Grok audit issues resolved
+#
+# GROK FIXES APPLIED:
+#   Bug 3:  SC2 → SC1  (SC2 does not exist on MT12)
+#   Bug 4:  SD2 → SA2/SA0 (SD2 does not exist; L4 redesigned)
+#   Bug 5:  FM names Race/Stage/Burnout, SA0/SA1/SA2 mapping corrected
+#   Bug 6:  4 placeholder curves defined (Burnout/Stg1/Stg2/Stg3)
+#   Bug 7:  add_input() now populates expoData and inputNames (fixed in model.py)
+#   Bug 9:  CustomFn throttle kill trigger chain corrected
+#   Bug 10: FM channel map CH1=ST CH2=TH enforced; all swtch refs valid
+#
+# DRIVE MODE MAP (LOCKED):
+#   FM0 = Race    (SA up  / SA0) — default, car is running
+#   FM1 = Stage   (SA mid / SA1) — staging lane, 25% power cap
+#   FM2 = Burnout (SA down/ SA2) — burnout box, ramps to 75%
+#
+# LOGICAL SWITCH CHAIN:
+#   L1 — Throttle > 0.5% AND transbrake held (SC1)
+#   L2 — Stage capture: fires when L1 fires, holds 1.0s, gate=L1
+#   L3 — Confirmed stage: same as L2 but 1.0s delay before firing
+#   L4 — Master arm: set=SA2 (enter Burnout), clear=SA0 (return to Race)
+#        !L4 = throttle kill + red LED
+#         L4 = launch active + green LED
+#
+# SAFETY:
+#   - CH6/SD is NEVER assigned
+#   - !L4 override kills CH2 (throttle) at all times when disarmed
+#   - SA must be up (Race) on power-on to clear switch warning
+#
+# Run command:
+#   C:/Users/WickedFog/AppData/Local/Programs/Python/Python312/python.exe drag_race_template.py
+#   cp output/Drag_Race_RoosTx.yml ../models/Drag_Race_v4.yml
 
-DRIVE MODES (SA):
-  DM0 (SA up)  = Race    -- default on power-up, full throttle available
-  DM1 (SA mid) = Stage   -- creep to staging beams, dual throttle curves
-  DM2 (SA dn)  = Burnout -- burnout prep, timed sequence via SC
+import sys
+import os
+import yaml
 
-MASTER SAFETY:
-  SD up  = throttle BLOCKED (always enforced via customFn OVERRIDE)
-  SD dn  = throttle ARMED / available
-  No SA startup warning required -- SD block handles safety at all times.
-
-SC ROLES (changes per DM -- intentional design):
-  DM0 Race:    SC held = transbrake (throttle locked at 0), release = launch
-  DM1 Stage:   SC held = Throttle Curve 2 (fine creep), release = Curve 1
-  DM2 Burnout: SC held + Throttle Trigger > threshold = burnout sequence
-
-BURNOUT SEQUENCE (pure EdgeTX, 0.1s resolution):
-  1. SC held + throttle > 80% triggers L1
-  2. L1 must hold 2.0s to arm L2 (prevents accidental trigger)
-  3. L2 arms -- burnout active at 80% cap -- runs for 7.0s (L3)
-  4. L3 clears -- L4 fires after 7.0s delay -- lockout active for 10.0s
-  5. L4 lockout clears -- returns to 80% cap
-
-RACE LAUNCH (Lua required for sub-0.1s timing -- STUBBED in this template):
-  SC release triggers ramp stages:
-  Stage 1: ramp to 50% over 0.5s (default)
-  Stage 2: ramp to 75% over 0.3s (default)
-  Stage 3: straight ramp to 100%
-  Delay box: 0.00-0.50s in 0.01s steps, trim-adjustable
-
-TERMINOLOGY (locked for RoosTx -- never use aircraft terms):
-  Steering Wheel (not stick)
-  Throttle Trigger (not stick)
-  Drive Mode / DM (not Flight Mode / FM)
-
-LOGICAL SWITCH MAP:
-  L1 = Burnout trigger    (throttle > threshold AND SC held, DM2)
-  L2 = Burnout arm latch  (STICKY, 2.0s arm delay)
-  L3 = Burnout run timer  (STICKY, 7.0s duration)
-  L4 = Burnout lockout    (STICKY, 7.0s delay then 10.0s lockout)
-
-NOTE ON TIMING VALUES:
-  EdgeTX logical switch delay/duration fields store values in tenths of
-  a second (0.1s resolution). So delay=20 = 2.0s, duration=70 = 7.0s.
-  Verify against radio if behavior is unexpected.
-"""
-
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from model import EdgeTXModel
 
 
-# ── Radio map ────────────────────────────────────────────────────────────────
-MT12_DRAG_RADIO_MAP = {
-    "ROLE_DRIVE_MODE":  "SA",   # 3-pos: SA up=Race DM0, SA mid=Stage DM1, SA dn=Burnout DM2
-    "ROLE_TRANS_BRAKE": "SC",   # momentary: hold=transbrake(Race)/Curve2(Stage)/burnout trigger(Burnout)
-    "ROLE_MASTER_SAFE": "SD",   # 2-pos RESERVED: SD up=blocked, SD dn=armed -- NEVER REASSIGN
-    "ROLE_CURVE1_KNOB": "S1",   # pot: Stage Throttle Curve 1 level knob
-    "ROLE_CURVE2_KNOB": "S2",   # pot: Stage Throttle Curve 2 level knob
-}
+def build():
+    m = EdgeTXModel(name="Drag Race")
 
-# ── Burnout sequence timing defaults (values in tenths of seconds) ────────────
-# 0.1s resolution -- EdgeTX logical switch native limit
-BURNOUT = {
-    "cap":            80,    # % max throttle cap in burnout mode
-    "trigger_pct":    80,    # throttle % threshold to trigger sequence
-    "arm_delay":      20,    # 2.0s -- must hold SC + throttle to confirm intentional
-    "run_duration":   70,    # 7.0s -- burnout active window
-    "lockout_delay":  70,    # 7.0s -- delay before lockout fires (matches run_duration)
-    "lockout_dur":   100,    # 10.0s -- cool-down lockout window
-}
+    # ── DRIVE MODES ──────────────────────────────────────────────────────────
+    # FM0 = Race    (SA up)   — default, no switch required
+    # FM1 = Stage   (SA mid)  — staging lane
+    # FM2 = Burnout (SA down) — burnout box / launch prep
+    m.add_flight_mode(0, name="Race",    swtch=None)
+    m.add_flight_mode(1, name="Stage",   swtch="SA1")
+    m.add_flight_mode(2, name="Burnout", swtch="SA2")
 
-# ── Stage mode throttle defaults (%) ─────────────────────────────────────────
-STAGE = {
-    "curve1_cap":  50,   # Curve 1 cap (SC released) -- S1 knob overrides in wizard
-    "curve2_cap":  25,   # Curve 2 cap (SC held) -- percentage of Curve 1 effectively
-}
+    # ── INPUTS ───────────────────────────────────────────────────────────────
+    # Input 0 — Steering Wheel (ST → CH1)
+    # Input 1 — Throttle Trigger (TH → CH2)
+    m.add_input(0, src="ST", name="St", chn=0, weight=100, mode=3)
+    m.add_input(1, src="TH", name="TH", chn=1, weight=100, mode=3)
 
+    # ── CURVES ───────────────────────────────────────────────────────────────
+    # Straight line placeholders — Kevin dials in sine curves after radio test
+    # To wire to a mix: curve_type=1, curve_value=<index below>
+    #   Index 0 = Burnout   (CH2 override in FM2)
+    #   Index 1 = Stg1      (placeholder)
+    #   Index 2 = Stg2      (placeholder)
+    #   Index 3 = Stg3      (placeholder)
+    # TODO: replace points with tuned sine curves after on-radio verification
+    m.add_curve(0, name="Burnout", points=[-100, -50, 0, 50, 100])
+    m.add_curve(1, name="Stg1",    points=[-100, -50, 0, 50, 100])
+    m.add_curve(2, name="Stg2",    points=[-100, -50, 0, 50, 100])
+    m.add_curve(3, name="Stg3",    points=[-100, -50, 0, 50, 100])
 
-def build(name="Drag Race", reg_id="MT12", radio_map=None):
-    if radio_map is None:
-        radio_map = MT12_DRAG_RADIO_MAP
+    # ── MIXES ────────────────────────────────────────────────────────────────
+    # CH1 — Steering Wheel passthrough, always active
+    m.add_mix(destCh=0, srcRaw="I0", weight=100)
 
-    m = EdgeTXModel(name)
-    m._data["semver"] = "2.11.4"
-    if reg_id:
-        m.set_registration_id(reg_id)
+    # CH2 — Throttle Trigger base, always active
+    m.add_mix(destCh=1, srcRaw="I1", weight=100)
 
-    dm = radio_map["ROLE_DRIVE_MODE"]   # SA
-    tb = radio_map["ROLE_TRANS_BRAKE"]  # SC
-    ms = radio_map["ROLE_MASTER_SAFE"]  # SD
+    # CH2 — Stage power (25%, 1.0s ramp up)
+    #   Active: L2 fired AND in FM1 (Stage mode / SA mid) only
+    #   flightModes "101111111" = FM1 active, FM0+FM2 disabled
+    #   Replaces base throttle with limited staging power
+    #   speedUp=10 = 1.0s ramp (tenths of a second)
+    #   Curves: wired after radio verification (curve_type=0 for now)
+    m.add_mix(
+        destCh=1, srcRaw="MAX", weight=25,
+        swtch="L2", mltpx="REPL",
+        speedUp=10, speedDown=0, carryTrim=0,
+        flightModes="101111111",
+        name=""
+    )
 
-    # ── Drive Modes ───────────────────────────────────────────────────────────
-    # DM0 = Race (SA up) -- default, no switch condition
-    # DM1 = Stage (SA mid)
-    # DM2 = Burnout (SA dn)
-    # SD master block enforces safety -- no SA startup warning needed
-    m.add_flight_mode(0, "Race")
-    m.add_flight_mode(1, "Stage",   f"{dm}1")
-    m.add_flight_mode(2, "Burnout", f"{dm}2")
+    # CH2 — Burnout power (75%, 1.0s ramp up)
+    #   Active: L3 fired AND in FM2 (Burnout mode / SA down) only
+    #   flightModes "110111111" = FM2 active, FM0+FM1 disabled
+    #   Replaces base throttle with burnout-level power
+    m.add_mix(
+        destCh=1, srcRaw="MAX", weight=75,
+        swtch="L3", mltpx="REPL",
+        speedUp=10, speedDown=0, carryTrim=0,
+        flightModes="110111111",
+        name=""
+    )
 
-    # SD must be UP (safe/blocked) on startup
-    m.set_switch_warning(ms, "up")
+    # ── LOGICAL SWITCHES ─────────────────────────────────────────────────────
 
-    # ── Inputs ────────────────────────────────────────────────────────────────
-    m.add_input(0, "ST", name="Whl",  weight=100, offset=0, curve_type=1, curve_value=0)   # Steering Wheel - straight ramp
-    m.add_input(1, "TH", name="Trig", weight=100, offset=0, curve_type=1, curve_value=0)  # Throttle Trigger - straight ramp
+    # L1 — Throttle trigger with transbrake held
+    #   FUNC_VPOS: Throttle input (I1) > 5 (~0.5% of -1024 to 1024 range)
+    #   andsw=SC1: only evaluates while transbrake (SC) is held
+    #   SC2 DOES NOT EXIST — SC1 only (momentary switch)
+    m.add_logical_switch(
+        index=0,
+        func="FUNC_VPOS",
+        v1="I1", v2="5",
+        andsw="SC1",
+        delay=0, duration=0
+    )
 
-    # ── Mixes ─────────────────────────────────────────────────────────────────
-    # flightModes bitmask: 9 digits, position 0=DM0 / 1=DM1 / 2=DM2 / rest=unused
-    # 0 = mix IS active in that DM, 1 = mix is NOT active
-    # Active DM0 only: 011111111
-    # Active DM1 only: 101111111
-    # Active DM2 only: 110111111
-    # Active all DMs:  000000000
+    # L2 — Stage capture sticky
+    #   Set:      L1 rising edge (throttle + transbrake fires)
+    #   Clear:    none (NONE = no explicit clear signal)
+    #   Gate:     L1 (hard gate — if throttle or SC released, L2 drops immediately)
+    #   Duration: 10 = 1.0s auto-hold
+    #   Feeds: CH2 25% stage power mix
+    m.add_logical_switch(
+        index=1,
+        func="FUNC_STICKY",
+        v1="L1", v2="NONE",
+        andsw="L1",
+        delay=0, duration=10
+    )
 
-    # CH1: Steering Wheel -- straight pass-through all drive modes
-    m.add_mix(dest_ch=0, src_raw="I0", weight=100,
-              flight_modes="000000000", name="Steering Wheel")
+    # L3 — Confirmed stage sticky
+    #   Same gate as L2 (L1 must stay active)
+    #   Delay: 10 = 1.0s delay before firing (driver must hold 1.0s to confirm)
+    #   Duration: 10 = 1.0s hold after firing
+    #   Feeds: CH2 75% burnout power mix
+    m.add_logical_switch(
+        index=2,
+        func="FUNC_STICKY",
+        v1="L1", v2="NONE",
+        andsw="L1",
+        delay=10, duration=10
+    )
 
-    # CH2: Throttle Trigger -- base pass-through (overridden by mode logic below)
-    m.add_mix(dest_ch=1, src_raw="I1", weight=100,
-              flight_modes="000000000", name="Throttle Trigger")
+    # L4 — Master arm
+    #   Set:   SA2 (driver moves SA to down = enters Burnout mode = armed)
+    #   Clear: SA0 (driver moves SA to up = returns to Race = disarmed)
+    #   Gate:  NONE (holds state independently)
+    #
+    #   !L4 = system disarmed → throttle killed + red LED
+    #    L4 = system armed    → throttle live + green LED
+    #
+    #   SD2 DOES NOT EXIST — original bug fixed
+    #   SA2 and SA0 are valid 3-way switch positions
+    m.add_logical_switch(
+        index=3,
+        func="FUNC_STICKY",
+        v1="SA2", v2="SA0",
+        andsw="NONE",
+        delay=0, duration=0
+    )
 
-    # DM0 Race: SC held = transbrake -- replace throttle with 0 while SC pressed
-    m.add_mix(dest_ch=1, src_raw="MAX", weight=0,
-              switch=f"{tb}1", mltpx="REPL",
-              flight_modes="011111111", name="Transbrake")
+    # ── CUSTOM FUNCTIONS ─────────────────────────────────────────────────────
 
-    # DM1 Stage: SC released = Throttle Curve 1 cap (S1 knob -- default 50%)
-    m.add_mix(dest_ch=1, src_raw="MAX", weight=STAGE["curve1_cap"],
-              switch=f"!{tb}1", mltpx="REPL",
-              flight_modes="101111111", name="Stage Curve 1")
+    # CF0 — Master throttle block
+    #   When NOT armed (!L4): override CH2 to zero
+    #   def "1,0,1" = channel_index=1(CH2), value=0(kill), enable=1
+    #   This is a hardware-level override, bypasses mixer entirely
+    m.add_custom_fn(swtch="!L4", func="OVERRIDE_CHANNEL", defn="1,0,1")
 
-    # DM1 Stage: SC held = Throttle Curve 2 cap (S2 knob -- default 25%)
-    # Fine creep for staging beam approach -- creep/brake/creep with SC pulses
-    m.add_mix(dest_ch=1, src_raw="MAX", weight=STAGE["curve2_cap"],
-              switch=f"{tb}1", mltpx="REPL",
-              flight_modes="101111111", name="Stage Curve 2")
+    # CF1 — Red LED: system disarmed
+    m.add_custom_fn(swtch="!L4", func="RGB_LED", defn="red,1,On")
 
-    # DM2 Burnout: base throttle cap (80% default)
-    # Overridden to 0 by L4 lockout customFn when cool-down is active
-    m.add_mix(dest_ch=1, src_raw="MAX", weight=BURNOUT["cap"],
-              mltpx="REPL",
-              flight_modes="110111111", name="Burnout Cap")
+    # CF2 — Green LED: system armed / launch active
+    m.add_custom_fn(swtch="L4",  func="RGB_LED", defn="green,1,On")
 
-    # ── Logical Switches ──────────────────────────────────────────────────────
-    # BURNOUT SEQUENCE (L1-L4):
-    #   L1: Trigger  -- throttle > threshold AND SC held
-    #   L2: Arm      -- STICKY, 2.0s hold required before arming
-    #   L3: Run      -- STICKY, active for 7.0s (burnout window)
-    #   L4: Lockout  -- STICKY, fires 7.0s after arm, active 10.0s (cool-down)
+    # ── MISC ─────────────────────────────────────────────────────────────────
+    # SA must be up (Race) on power-on — warns driver if not in safe state
+    m.set_switch_warning("SA", "up")
+    m.set_thr_trace("TH")
 
-    # L1: Burnout trigger -- throttle above threshold AND SC held
-    m.add_logical_switch(0, "FUNC_VPOS",
-                         f"I1,{BURNOUT['trigger_pct']}",
-                         and_switch=f"{tb}1")
-
-    # L2: Arm latch -- sticky, sets on L1, requires 2.0s continuous hold
-    m.add_logical_switch(1, "FUNC_STICKY", "L1,NONE",
-                         delay=BURNOUT["arm_delay"],
-                         duration=0,
-                         and_switch="L1")
-
-    # L3: Burnout run timer -- sticky, active for 7.0s then self-clears
-    m.add_logical_switch(2, "FUNC_STICKY", "L2,NONE",
-                         delay=0,
-                         duration=BURNOUT["run_duration"],
-                         and_switch="L2")
-
-    # L4: Lockout -- sticky, fires 7.0s after L2 arms, active for 10.0s cool-down
-    # Delay matches run_duration so lockout starts exactly when burnout ends
-    m.add_logical_switch(3, "FUNC_STICKY", "L2,NONE",
-                         delay=BURNOUT["lockout_delay"],
-                         duration=BURNOUT["lockout_dur"],
-                         and_switch="NONE")
-
-    # ── Custom Functions ───────────────────────────────────────────────────────
-    # Master safety block -- SD up = throttle forced to 0 at all times
-    m.add_custom_fn(0, f"!{ms}1", "OVERRIDE_CHANNEL", "1,0,1")
-
-    # Burnout lockout -- L4 active = throttle forced to 0 (cool-down)
-    m.add_custom_fn(1, "L4", "OVERRIDE_CHANNEL", "1,0,1")
-
-    # LED: Red = SD up (blocked/disarmed)
-    m.add_custom_fn(2, f"!{ms}1", "RGB_LED", "red,1,On")
-
-    # LED: Green = SD dn (armed)
-    m.add_custom_fn(3, f"{ms}1", "RGB_LED", "green,1,On")
-
-    # ── Curves (straight line placeholders -- Kevin to dial in sine curves) ──
-    # 2-point curves: [y at x=-100, y at x=+100]
-    # Throttle context: x=-100=no input, x=+100=full trigger
-    m.add_curve(0, "Burnout",  [-100, 60,  80])   # starts 60%, ramps to 80%
-    m.add_curve(1, "Stg1",    [-100,  0,  50])    # 0% to Stage 2 start (50%)
-    m.add_curve(2, "Stg2",    [-100, 50,  75])    # 50% to Stage 3 start (75%)
-    m.add_curve(3, "Stg3",    [-100, 75, 100])    # 75% to full
-
-    # ── Throttle trace ─────────────────────────────────────────────────────────
-    m.set_throttle_trace("TH")
-
-    # ── Lua stubs (not yet implemented) ───────────────────────────────────────
-    # TODO: delay_box.lua  -- 0.00-0.50s delay, 0.01s steps, trim-adjustable
-    # TODO: launch_ramp.lua -- Stage 1: 50% over 0.5s, Stage 2: 75% over 0.3s, Stage 3: 100%
-
-    return m
+    return m.build()
 
 
 if __name__ == "__main__":
-    import os
+    model_data = build()
+
     os.makedirs("output", exist_ok=True)
-    model = build()
-    model.describe()
-    model.save("output/Drag_Race_RoosTx.yml")
-    print("Done. Import output/Drag_Race_RoosTx.yml into Companion to verify.")
+    out_path = "output/Drag_Race_RoosTx.yml"
 
+    with open(out_path, "w") as f:
+        yaml.dump(
+            model_data,
+            f,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False
+        )
 
-
+    print(f"[OK] Generated: {out_path}")

@@ -18,212 +18,212 @@ extendedTrims: 0
 throttleReversed: 0
 checklistInteractive: 0
 flightModeData:
-  '0':
+  0:
+    name: Race
     fadeIn: 0
     fadeOut: 0
-    name: Race
-  '1':
+  1:
+    name: Stage
     fadeIn: 0
     fadeOut: 0
     swtch: SA1
-    name: Stage
-  '2':
+  2:
+    name: Burnout
     fadeIn: 0
     fadeOut: 0
     swtch: SA2
-    name: Burnout
 mixData:
-  - destCh: 0
-    srcRaw: I0
-    weight: 100
-    swtch: NONE
-    curve:
-      type: 0
-      value: 0
-    delayPrec: 0
-    delayUp: 0
-    delayDown: 0
-    speedPrec: 0
-    speedUp: 0
-    speedDown: 0
-    carryTrim: 0
-    mltpx: ADD
-    mixWarn: 0
-    flightModes: '000000000'
-    offset: 0
-    name: Steering Wheel
-  - destCh: 1
-    srcRaw: I1
-    weight: 100
-    swtch: NONE
-    curve:
-      type: 0
-      value: 0
-    delayPrec: 0
-    delayUp: 0
-    delayDown: 0
-    speedPrec: 0
-    speedUp: 0
-    speedDown: 0
-    carryTrim: 0
-    mltpx: ADD
-    mixWarn: 0
-    flightModes: '000000000'
-    offset: 0
-    name: Throttle Trigger
-  - destCh: 1
-    srcRaw: MAX
-    weight: 0
-    swtch: SC1
-    curve:
-      type: 0
-      value: 0
-    delayPrec: 0
-    delayUp: 0
-    delayDown: 0
-    speedPrec: 0
-    speedUp: 0
-    speedDown: 0
-    carryTrim: 0
-    mltpx: REPL
-    mixWarn: 0
-    flightModes: '011111111'
-    offset: 0
-    name: Transbrake
-  - destCh: 1
-    srcRaw: MAX
-    weight: 50
-    swtch: '!SC1'
-    curve:
-      type: 0
-      value: 0
-    delayPrec: 0
-    delayUp: 0
-    delayDown: 0
-    speedPrec: 0
-    speedUp: 0
-    speedDown: 0
-    carryTrim: 0
-    mltpx: REPL
-    mixWarn: 0
-    flightModes: '101111111'
-    offset: 0
-    name: Stage Curve 1
-  - destCh: 1
-    srcRaw: MAX
-    weight: 25
-    swtch: SC1
-    curve:
-      type: 0
-      value: 0
-    delayPrec: 0
-    delayUp: 0
-    delayDown: 0
-    speedPrec: 0
-    speedUp: 0
-    speedDown: 0
-    carryTrim: 0
-    mltpx: REPL
-    mixWarn: 0
-    flightModes: '101111111'
-    offset: 0
-    name: Stage Curve 2
-  - destCh: 1
-    srcRaw: MAX
-    weight: 80
-    swtch: NONE
-    curve:
-      type: 0
-      value: 0
-    delayPrec: 0
-    delayUp: 0
-    delayDown: 0
-    speedPrec: 0
-    speedUp: 0
-    speedDown: 0
-    carryTrim: 0
-    mltpx: REPL
-    mixWarn: 0
-    flightModes: '110111111'
-    offset: 0
-    name: Burnout Cap
+- destCh: 0
+  srcRaw: I0
+  weight: 100
+  swtch: NONE
+  curve:
+    type: 0
+    value: 0
+  delayPrec: 0
+  delayUp: 0
+  delayDown: 0
+  speedPrec: 0
+  speedUp: 0
+  speedDown: 0
+  carryTrim: 0
+  mltpx: ADD
+  mixWarn: 0
+  flightModes: '000000000'
+  offset: 0
+  name: ''
+- destCh: 1
+  srcRaw: I1
+  weight: 100
+  swtch: NONE
+  curve:
+    type: 0
+    value: 0
+  delayPrec: 0
+  delayUp: 0
+  delayDown: 0
+  speedPrec: 0
+  speedUp: 0
+  speedDown: 0
+  carryTrim: 0
+  mltpx: ADD
+  mixWarn: 0
+  flightModes: '000000000'
+  offset: 0
+  name: ''
+- destCh: 1
+  srcRaw: MAX
+  weight: 25
+  swtch: L2
+  curve:
+    type: 0
+    value: 0
+  delayPrec: 0
+  delayUp: 0
+  delayDown: 0
+  speedPrec: 0
+  speedUp: 10
+  speedDown: 0
+  carryTrim: 0
+  mltpx: REPL
+  mixWarn: 0
+  flightModes: '101111111'
+  offset: 0
+  name: ''
+- destCh: 1
+  srcRaw: MAX
+  weight: 75
+  swtch: L3
+  curve:
+    type: 0
+    value: 0
+  delayPrec: 0
+  delayUp: 0
+  delayDown: 0
+  speedPrec: 0
+  speedUp: 10
+  speedDown: 0
+  carryTrim: 0
+  mltpx: REPL
+  mixWarn: 0
+  flightModes: '110111111'
+  offset: 0
+  name: ''
 expoData:
-  - chn: 0
-    srcRaw: ST
-    weight: 100
-    name: Whl
-    mode: 3
-    offset: 0
-    curve:
-      type: 1
-      value: 0
-    swtch: NONE
-  - chn: 1
-    srcRaw: TH
-    weight: 100
-    name: Trig
-    mode: 3
-    offset: 0
-    curve:
-      type: 1
-      value: 0
-    swtch: NONE
+- srcRaw: ST
+  scale: 0
+  mode: 3
+  chn: 0
+  swtch: NONE
+  flightModes: '000000000'
+  weight: 100
+  offset: 0
+  curve:
+    type: 1
+    value: 0
+  trimSource: 0
+  name: ''
+- srcRaw: TH
+  scale: 0
+  mode: 3
+  chn: 1
+  swtch: NONE
+  flightModes: '000000000'
+  weight: 100
+  offset: 0
+  curve:
+    type: 1
+    value: 0
+  trimSource: 0
+  name: ''
 inputNames:
-  '0': Whl
-  '1': Trig
+  0:
+    val: St
+  1:
+    val: TH
+curves:
+- name: Burnout
+  type: 0
+  smooth: 0
+  points:
+  - -100
+  - -50
+  - 0
+  - 50
+  - 100
+- name: Stg1
+  type: 0
+  smooth: 0
+  points:
+  - -100
+  - -50
+  - 0
+  - 50
+  - 100
+- name: Stg2
+  type: 0
+  smooth: 0
+  points:
+  - -100
+  - -50
+  - 0
+  - 50
+  - 100
+- name: Stg3
+  type: 0
+  smooth: 0
+  points:
+  - -100
+  - -50
+  - 0
+  - 50
+  - 100
 logicalSw:
-  '0':
+  0:
     func: FUNC_VPOS
-    def: I1,80
-    andsw: SC1
+    def: I1,5
     delay: 0
     duration: 0
+    andsw: SC1
     lsPersist: 0
     lsState: 0
-  '1':
+  1:
     func: FUNC_STICKY
     def: L1,NONE
-    andsw: L1
-    delay: 20
-    duration: 0
-    lsPersist: 0
-    lsState: 0
-  '2':
-    func: FUNC_STICKY
-    def: L2,NONE
-    andsw: L2
     delay: 0
-    duration: 70
+    duration: 10
+    andsw: L1
     lsPersist: 0
     lsState: 0
-  '3':
+  2:
     func: FUNC_STICKY
-    def: L2,NONE
+    def: L1,NONE
+    delay: 10
+    duration: 10
+    andsw: L1
+    lsPersist: 0
+    lsState: 0
+  3:
+    func: FUNC_STICKY
+    def: SA2,SA0
+    delay: 0
+    duration: 0
     andsw: NONE
-    delay: 70
-    duration: 100
     lsPersist: 0
     lsState: 0
 customFn:
-  '0':
-    swtch: '!SD1'
-    func: OVERRIDE_CHANNEL
-    def: 1,0,1
-  '1':
-    swtch: L4
-    func: OVERRIDE_CHANNEL
-    def: 1,0,1
-  '2':
-    swtch: '!SD1'
-    func: RGB_LED
-    def: red,1,On
-  '3':
-    swtch: SD1
-    func: RGB_LED
-    def: green,1,On
+- swtch: '!L4'
+  func: OVERRIDE_CHANNEL
+  def: 1,0,1
+- swtch: '!L4'
+  func: RGB_LED
+  def: red,1,On
+- swtch: L4
+  func: RGB_LED
+  def: green,1,On
 thrTraceSrc: TH
 switchWarning:
-  SD:
+  SA:
     pos: up
 thrTrimSw: 0
 potsWarnMode: WARN_OFF

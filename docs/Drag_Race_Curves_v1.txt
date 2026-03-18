@@ -1,0 +1,16 @@
+
+The Burnout Curve:
+
+Once you let that brake go, get that tire to high rpm immediately to break traction. Like 60-70%. Then gradually ramp to your max as the tire warms and traction increases. My ultimate goal for an awesome burnout routine is to attach a load meter to the motor. Theoretically, the tire temp should follow the load. So as the load climbs, the tire temp climbs. Likely not super scientifically certifiable data, but a far cry better than somebody guessing.
+
+=============================================================
+
+Launch Stage 1:
+
+Launch curve will need some roller coaster to it. From zero, a quick ramp up to 10-20%, just to where the tire is starting th break loose. throttle drops off to rehook the tires then climbs to stage two. Kinda like how anti-lock breaks do, but we can call this anti-spin throttle. With telemetry data to find where your wheels are spinning, a bit of trial and errorr, you should be getting thos 6=' times dialed in nicely. With this data and some custoome curves to get you the best hookup trough the launch,you could use this curve to get you off to a great run.
+
+=============================================================
+
+Stage 2 and 3:
+
+Do we need these extra curves? Fuck yeah we do. The ultimate ride will be as light as possible - running as fast as possible, while maintaning just enough traction to keep the run straight.. if you aren't running on the ragged edge of coming loose, you should go home. And anyboody whoo has driven a drag car or watched drag racing, that 110' mark gets hairy as the car either gets in it's groove, or gets in his competitions door panel. The only way to get there as fast as you ossibly can will havee varienves in the throttle, unless you couldd dial in your throttle to the very edge of coming loose The more throttles curves yu ave, the coser youre gongg to bee able to dial in yur run.is ease into every step up. If I was an AI bot I could make a good arguement how the car's aerodynamics require throttle shift at various speeds to get your best run.

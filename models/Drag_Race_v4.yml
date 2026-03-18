@@ -184,7 +184,7 @@ logicalSw:
     def: I1,5
     delay: 0
     duration: 0
-    andsw: SC↓
+    andsw: "SC\u2193"
     lsPersist: 0
     lsState: 0
   1:

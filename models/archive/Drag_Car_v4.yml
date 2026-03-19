@@ -1,0 +1,57 @@
+- name: Drag_Race_v4
+    terminology:
+      steering: Steering Wheel
+      throttle: Throttle Trigger
+      modes: Drive Mode
+    
+    hardware:
+      ch1: Steering Wheel
+      ch2: Throttle Trigger
+      ch3: SA
+      ch4: SB
+      ch5: SC
+      ch6: SD
+      ch7: S1
+      ch8: S2
+
+    safety:
+      master_switch: SD↑
+      state: BLOCKED
+      logic: "Throttle only available when SD is DOWN"
+      led_blocked: Red
+      led_armed: Green
+
+    global_variables:
+      GV1: "Burnout throttle cap %"
+      GV2: "Stage Throttle Curve 1 %"
+      GV3: "Stage Throttle Curve 2 %"
+      GV4: "Burnout arm delay (seconds)"
+      GV5: "Burnout run time (seconds)"
+      GV6: "Burnout lockout time (seconds)"
+
+    drive_modes:
+      - name: Race Mode
+        switch: SA↑
+        transbrake: SC
+        logic: "Hold SC for Transbrake. Release for Lua-controlled 3-stage ramp."
+        ramp_lua:
+          delay_box: "0.00-0.50s"
+          stage_1: "50% over 0.5s"
+          stage_2: "75% over 0.3s"
+          stage_3: "100% immediate"
+
+      - name: Stage Mode
+        switch: SA-
+        curve_1_base: S1
+        curve_2_secondary: S2
+        limiter_toggle: SC
+        logic: "SC released = Curve 1. SC held = Curve 2 active."
+
+      - name: Burnout Mode
+        switch: SA↓
+        throttle_limit: 80
+        logic: "Hold SC + Full Throttle Trigger to start sequence."
+        sequence:
+          arm_delay_sec: 2
+          run_time_sec: 7
+          lockout_time_sec: 10

@@ -1,8 +1,8 @@
 semver: 2.11.4
 header:
-  name: Fukd Off
-  bitmap: ''
-  labels: ''
+  name: DragAssOld
+  bitmap: ""
+  labels: ""
 noGlobalFunctions: 0
 thrTrim: 0
 trimInc: 0
@@ -18,20 +18,20 @@ extendedTrims: 0
 throttleReversed: 0
 checklistInteractive: 0
 flightModeData:
-  '0':
+  0:
+    name: Race
     fadeIn: 0
     fadeOut: 0
-    name: Launch
-  '1':
-    fadeIn: 0
-    fadeOut: 0
+  1:
     swtch: SA1
     name: Stage
-  '2':
     fadeIn: 0
     fadeOut: 0
+  2:
     swtch: SA2
-    name: WarmUp
+    name: Burnout
+    fadeIn: 0
+    fadeOut: 0
 mixData:
   - destCh: 0
     srcRaw: I0
@@ -49,9 +49,9 @@ mixData:
     carryTrim: 0
     mltpx: ADD
     mixWarn: 0
-    flightModes: '000000000'
+    flightModes: 000000000
     offset: 0
-    name: Steering
+    name: ""
   - destCh: 1
     srcRaw: I1
     weight: 100
@@ -68,116 +68,113 @@ mixData:
     carryTrim: 0
     mltpx: ADD
     mixWarn: 0
-    flightModes: '000000000'
+    flightModes: 000000000
     offset: 0
-    name: Throttle
-  - destCh: 1
-    srcRaw: MAX
-    weight: 25
-    swtch: L2
+    name: ""
+expoData:
+  - srcRaw: ST
+    scale: 0
+    mode: 3
+    chn: 0
+    swtch: NONE
+    flightModes: 000000000
+    weight: 100
+    offset: 0
     curve:
-      type: 0
+      type: 1
       value: 0
-    delayPrec: 0
-    delayUp: 0
-    delayDown: 0
-    speedPrec: 0
-    speedUp: 0
-    speedDown: 0
-    carryTrim: 0
-    mltpx: REPL
-    mixWarn: 0
-    flightModes: '000000000'
+    trimSource: 0
+    name: ""
+  - srcRaw: TH
+    scale: 0
+    mode: 3
+    chn: 1
+    swtch: NONE
+    flightModes: 000000000
+    weight: 100
     offset: 0
-    name: Stage Pulse
-  - destCh: 1
-    srcRaw: MAX
-    weight: 75
-    swtch: L3
     curve:
-      type: 0
+      type: 1
       value: 0
-    delayPrec: 0
-    delayUp: 0
-    delayDown: 0
-    speedPrec: 0
-    speedUp: 0
-    speedDown: 0
-    carryTrim: 0
-    mltpx: REPL
-    mixWarn: 0
-    flightModes: '011111111'
-    offset: 0
-    name: Prep Pulse
-  - destCh: 1
-    srcRaw: MAX
-    weight: 70
-    swtch: L3
-    curve:
-      type: 0
-      value: 0
-    delayPrec: 0
-    delayUp: 0
-    delayDown: 0
-    speedPrec: 0
-    speedUp: 0
-    speedDown: 0
-    carryTrim: 0
-    mltpx: REPL
-    mixWarn: 0
-    flightModes: '101111111'
-    offset: 0
-    name: WarmUp Cap
-  - destCh: 1
-    srcRaw: MAX
-    weight: 15
-    swtch: L3
-    curve:
-      type: 0
-      value: 0
-    delayPrec: 0
-    delayUp: 0
-    delayDown: 0
-    speedPrec: 0
-    speedUp: 0
-    speedDown: 0
-    carryTrim: 0
-    mltpx: REPL
-    mixWarn: 0
-    flightModes: '110111111'
-    offset: 0
-    name: Stage Cap
-expoData: []
-inputNames: {}
+    trimSource: 0
+    name: ""
+inputNames:
+  0:
+    val: St
+  1:
+    val: TH
+curves:
+  0:
+    type: 1
+    smooth: 1
+    points: -3
+    name: R1
+  1:
+    type: 1
+    smooth: 1
+    points: -3
+    name: R2
+  2:
+    type: 1
+    smooth: 1
+    points: -3
+    name: RM3
+points:
+  0:
+    val: -100
+  1:
+    val: 0
+  2:
+    val: 0
+  3:
+    val: 75
+  4:
+    val: 75
+  5:
+    val: 100
 logicalSw:
-  '0':
+  0:
     func: FUNC_VPOS
     def: I1,5
+    delay: 0
+    duration: 0
     andsw: SC2
-  '1':
+    lsPersist: 0
+    lsState: 0
+  1:
     func: FUNC_STICKY
     def: L1,NONE
-    andsw: L1
+    delay: 0
     duration: 10
-  '2':
+    andsw: L1
+    lsPersist: 0
+    lsState: 0
+  2:
     func: FUNC_STICKY
     def: L1,NONE
-    andsw: L1
     delay: 10
     duration: 10
-  '3':
+    andsw: L1
+    lsPersist: 0
+    lsState: 0
+  3:
     func: FUNC_STICKY
     def: SD2,SD2
+    delay: 0
+    duration: 0
+    andsw: NONE
+    lsPersist: 0
+    lsState: 0
 customFn:
-  '0':
-    swtch: '!L4'
+  0:
+    swtch: "!L4"
     func: OVERRIDE_CHANNEL
     def: 1,0,1
-  '1':
-    swtch: '!L4'
+  1:
+    swtch: "!L4"
     func: RGB_LED
     def: red,1,On
-  '2':
+  2:
     swtch: L4
     func: RGB_LED
     def: green,1,On
@@ -204,13 +201,13 @@ rfAlarms:
   critical: 42
 disableTelemetryWarning: 0
 trainerData:
-  mode: 'OFF'
+  mode: OFF
   channelsStart: 0
   channelsCount: -8
   frameLength: 0
   delay: 0
   pulsePol: 0
-modelRegistrationID: '55'
+modelRegistrationID: MT12
 hatsMode: GLOBAL
 usbJoystickExtMode: 0
 usbJoystickIfMode: JOYSTICK

@@ -1,0 +1,98 @@
+semver: 2.11.4
+header:
+  name: GrokWagon
+  bitmap: ""
+  labels: ""
+noGlobalFunctions: 0
+thrTrim: 0
+extendedLimits: 1
+throttleReversed: 0
+flightModeData:
+  0:
+    name: Race
+  1:
+    swtch: SA↑
+    name: Stage
+  2:
+    swtch: SA↓
+    name: Burnout
+mixData:
+  - destCh: 0
+    srcRaw: I0
+    weight: 100
+    mltpx: ADD
+    flightModes: 111111111
+    name: "Steering"
+  - destCh: 1
+    srcRaw: I1
+    weight: 100
+    mltpx: ADD
+    flightModes: 111111111
+    name: "Throttle"
+  - destCh: 1
+    srcRaw: MAX
+    weight: -100
+    swtch: SD↑
+    mltpx: ADD
+    flightModes: 111111111
+    name: "Brake/Override"
+expoData:
+  - srcRaw: ST
+    chn: 0
+    weight: 100
+    curve:
+      type: 1
+      value: 0
+  - srcRaw: TH
+    chn: 1
+    weight: 100
+    curve:
+      type: 1
+      value: 0
+curves:
+  0:
+    type: 1
+    smooth: 1
+    points: 9
+    name: Throttle Curve
+points:
+  0: -100
+  1: -50
+  2: 0
+  3: 40
+  4: 60
+  5: 80
+  6: 80
+  7: 90
+  8: 100
+logicalSw:
+  0:
+    func: v>val
+    def: I1,95
+    delay: 20
+    andsw: SC↓
+    name: "Full Throttle"
+  1:
+    func: sticky
+    def: L1,!
+    duration: 70
+    andsw: !SC↓
+    name: "Stage Lock"
+customFn:
+  0:
+    swtch: SD↑
+    func: OVERRIDE
+    def: CH1,-100
+    name: "Full Brake"
+  1:
+    swtch: SD↑
+    func: RGB_LED
+    def: red,1,On
+  2:
+    swtch: !SD↑
+    func: RGB_LED
+    def: green,1,On
+thrTraceSrc: TH
+switchWarning:
+  SA: up
+modelRegistrationID: MT12

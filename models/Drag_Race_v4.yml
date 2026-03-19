@@ -231,21 +231,29 @@ logicalSw:
     lsPersist: 0
     lsState: 0
   4:
+    func: FUNC_AND
+    def: SD,!L6
+    delay: 0
+    duration: 0
+    andsw: NONE
+    lsPersist: 0
+    lsState: 0
+  5:
     func: FUNC_STICKY
-    def: SD,SD
+    def: L5,SD
     delay: 0
     duration: 0
     andsw: NONE
     lsPersist: 0
     lsState: 0
 customFn:
-- swtch: '!L5'
+- swtch: '!L6'
   func: OVERRIDE_CHANNEL
   def: 1,0,1
-- swtch: '!L5'
+- swtch: '!L6'
   func: RGB_LED
   def: red,1,On
-- swtch: L5
+- swtch: L6
   func: RGB_LED
   def: green,1,On
 thrTraceSrc: TH

@@ -1,4 +1,4 @@
-﻿semver: 2.11.4
+semver: 2.11.4
 header:
   name: Drag Race
   bitmap: ''
@@ -23,15 +23,15 @@ flightModeData:
     fadeIn: 0
     fadeOut: 0
   1:
-    swtch: SA1
     name: Stage
     fadeIn: 0
     fadeOut: 0
+    swtch: SA1
   2:
-    swtch: SA2
     name: Burnout
     fadeIn: 0
     fadeOut: 0
+    swtch: SA2
 mixData:
 - destCh: 0
   srcRaw: I0
@@ -51,7 +51,7 @@ mixData:
   mixWarn: 0
   flightModes: '000000000'
   offset: 0
-  name: Steering
+  name: ''
 - destCh: 1
   srcRaw: I1
   weight: 100
@@ -68,32 +68,13 @@ mixData:
   carryTrim: 0
   mltpx: ADD
   mixWarn: 0
-  flightModes: '011111111'
+  flightModes: '000000000'
   offset: 0
-  name: TH Race base
-- destCh: 1
-  srcRaw: MAX
-  weight: 50
-  swtch: NONE
-  curve:
-    type: 0
-    value: 0
-  delayPrec: 0
-  delayUp: 0
-  delayDown: 0
-  speedPrec: 0
-  speedUp: 5
-  speedDown: 0
-  carryTrim: 0
-  mltpx: REPL
-  mixWarn: 0
-  flightModes: '101111111'
-  offset: 0
-  name: Stage Curve1
+  name: ''
 - destCh: 1
   srcRaw: MAX
   weight: 25
-  swtch: SC
+  swtch: L2
   curve:
     type: 0
     value: 0
@@ -101,18 +82,18 @@ mixData:
   delayUp: 0
   delayDown: 0
   speedPrec: 0
-  speedUp: 0
+  speedUp: 10
   speedDown: 0
   carryTrim: 0
   mltpx: REPL
   mixWarn: 0
   flightModes: '101111111'
   offset: 0
-  name: Stage Curve2 SC
+  name: ''
 - destCh: 1
-  srcRaw: I1
-  weight: 80
-  swtch: NONE
+  srcRaw: MAX
+  weight: 75
+  swtch: L3
   curve:
     type: 0
     value: 0
@@ -120,14 +101,14 @@ mixData:
   delayUp: 0
   delayDown: 0
   speedPrec: 0
-  speedUp: 0
+  speedUp: 10
   speedDown: 0
   carryTrim: 0
   mltpx: REPL
   mixWarn: 0
   flightModes: '110111111'
   offset: 0
-  name: Burnout cap 80pct
+  name: ''
 expoData:
 - srcRaw: ST
   scale: 0
@@ -203,7 +184,7 @@ logicalSw:
     def: I1,5
     delay: 0
     duration: 0
-    andsw: '!SC'
+    andsw: SC
     lsPersist: 0
     lsState: 0
   1:
@@ -230,30 +211,14 @@ logicalSw:
     andsw: NONE
     lsPersist: 0
     lsState: 0
-  4:
-    func: FUNC_AND
-    def: SD,!L6
-    delay: 0
-    duration: 0
-    andsw: NONE
-    lsPersist: 0
-    lsState: 0
-  5:
-    func: FUNC_STICKY
-    def: L5,SD
-    delay: 0
-    duration: 0
-    andsw: NONE
-    lsPersist: 0
-    lsState: 0
 customFn:
-- swtch: '!L6'
+- swtch: '!L4'
   func: OVERRIDE_CHANNEL
   def: 1,0,1
-- swtch: '!L6'
+- swtch: '!L4'
   func: RGB_LED
   def: red,1,On
-- swtch: L6
+- swtch: L4
   func: RGB_LED
   def: green,1,On
 thrTraceSrc: TH

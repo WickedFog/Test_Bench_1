@@ -230,19 +230,27 @@ logicalSw:
     andsw: NONE
     lsPersist: 0
     lsState: 0
+  4:
+    func: FUNC_STICKY
+    def: SD,SD
+    delay: 0
+    duration: 0
+    andsw: NONE
+    lsPersist: 0
+    lsState: 0
 customFn:
-- swtch: SD
+- swtch: '!L5'
   func: OVERRIDE_CHANNEL
   def: 1,0,1
-- swtch: SD
+- swtch: '!L5'
   func: RGB_LED
   def: red,1,On
-- swtch: '!SD'
+- swtch: L5
   func: RGB_LED
   def: green,1,On
 thrTraceSrc: TH
 switchWarning:
-  SD:
+  SA:
     pos: up
 thrTrimSw: 0
 potsWarnMode: WARN_OFF

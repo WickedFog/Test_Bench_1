@@ -1,4 +1,4 @@
-semver: 2.11.4
+﻿semver: 2.11.4
 header:
   name: Drag Race
   bitmap: ''
@@ -110,7 +110,7 @@ mixData:
   offset: 0
   name: Stage Curve2 SC
 - destCh: 1
-  srcRaw: MAX
+  srcRaw: I1
   weight: 80
   swtch: NONE
   curve:
@@ -203,7 +203,7 @@ logicalSw:
     def: I1,5
     delay: 0
     duration: 0
-    andsw: SC
+    andsw: '!SC'
     lsPersist: 0
     lsState: 0
   1:

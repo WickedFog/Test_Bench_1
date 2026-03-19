@@ -1,4 +1,4 @@
-﻿semver: 2.11.4
+semver: 2.11.4
 header:
   name: Drag Race
   bitmap: ''
@@ -23,12 +23,12 @@ flightModeData:
     fadeIn: 0
     fadeOut: 0
   1:
-    swtch: SA-
+    swtch: SA1
     name: Stage
     fadeIn: 0
     fadeOut: 0
   2:
-    swtch: "SA\u2193"
+    swtch: SA2
     name: Burnout
     fadeIn: 0
     fadeOut: 0
@@ -93,7 +93,7 @@ mixData:
 - destCh: 1
   srcRaw: MAX
   weight: 25
-  swtch: "SC\u2193"
+  swtch: SC
   curve:
     type: 0
     value: 0
@@ -203,7 +203,7 @@ logicalSw:
     def: I1,5
     delay: 0
     duration: 0
-    andsw: "SC\u2193"
+    andsw: SC
     lsPersist: 0
     lsState: 0
   1:
@@ -224,20 +224,20 @@ logicalSw:
     lsState: 0
   3:
     func: FUNC_STICKY
-    def: "SA\u2193,SA\u2191"
+    def: SA2,SA0
     delay: 0
     duration: 0
     andsw: NONE
     lsPersist: 0
     lsState: 0
 customFn:
-- swtch: "SD\u2191"
+- swtch: SD
   func: OVERRIDE_CHANNEL
   def: 1,0,1
-- swtch: "SD\u2191"
+- swtch: SD
   func: RGB_LED
   def: red,1,On
-- swtch: "SD\u2193"
+- swtch: '!SD'
   func: RGB_LED
   def: green,1,On
 thrTraceSrc: TH

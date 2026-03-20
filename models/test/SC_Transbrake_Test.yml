@@ -1,6 +1,6 @@
 semver: 2.11.4
 header:
-  name: Drag Race
+  name: SC Transbrake Test
   bitmap: ''
   labels: ''
 noGlobalFunctions: 0
@@ -9,7 +9,7 @@ trimInc: 0
 displayTrims: 0
 ignoreSensorIds: 0
 showInstanceIds: 0
-disableThrottleWarning: 0
+disableThrottleWarning: 1
 enableCustomThrottleWarning: 0
 customThrottleWarningPosition: 0
 beepANACenter: 0
@@ -19,22 +19,13 @@ throttleReversed: 0
 checklistInteractive: 0
 flightModeData:
   0:
-    name: Race
+    name: ''
     fadeIn: 0
     fadeOut: 0
-  1:
-    name: Stage
-    fadeIn: 0
-    fadeOut: 0
-    swtch: SA1
-  2:
-    name: Burnout
-    fadeIn: 0
-    fadeOut: 0
-    swtch: SA2
 mixData:
+# CH1 -- Steering passthrough
 - destCh: 0
-  srcRaw: I0
+  srcRaw: ST
   weight: 100
   swtch: NONE
   curve:
@@ -51,28 +42,10 @@ mixData:
   mixWarn: 0
   flightModes: '000000000'
   offset: 0
-  name: ''
+  name: Steering
+# CH2 -- Throttle base (ADD first, always active)
 - destCh: 1
-  srcRaw: MAX
-  weight: 0
-  swtch: '!L4'
-  curve:
-    type: 0
-    value: 0
-  delayPrec: 0
-  delayUp: 0
-  delayDown: 0
-  speedPrec: 0
-  speedUp: 0
-  speedDown: 0
-  carryTrim: 0
-  mltpx: REPL
-  mixWarn: 0
-  flightModes: '000000000'
-  offset: 0
-  name: Kill !L4
-- destCh: 1
-  srcRaw: I1
+  srcRaw: TH
   weight: 100
   swtch: NONE
   curve:
@@ -90,9 +63,11 @@ mixData:
   flightModes: '000000000'
   offset: 0
   name: TH base
+# CH2 -- Transbrake kill: REPL when L2 active (SC toggled ON)
+#   Zeroes throttle while transbrake is engaged
 - destCh: 1
   srcRaw: MAX
-  weight: 25
+  weight: 0
   swtch: L2
   curve:
     type: 0
@@ -101,18 +76,19 @@ mixData:
   delayUp: 0
   delayDown: 0
   speedPrec: 0
-  speedUp: 10
+  speedUp: 0
   speedDown: 0
   carryTrim: 0
   mltpx: REPL
   mixWarn: 0
-  flightModes: '101111111'
+  flightModes: '000000000'
   offset: 0
-  name: Stage cap
+  name: Transbrake
+# CH2 -- Master safety kill: REPL LAST when !L1 (SD disarmed)
 - destCh: 1
   srcRaw: MAX
-  weight: 75
-  swtch: L3
+  weight: 0
+  swtch: '!L1'
   curve:
     type: 0
     value: 0
@@ -120,14 +96,14 @@ mixData:
   delayUp: 0
   delayDown: 0
   speedPrec: 0
-  speedUp: 10
+  speedUp: 0
   speedDown: 0
   carryTrim: 0
   mltpx: REPL
   mixWarn: 0
-  flightModes: '110111111'
+  flightModes: '000000000'
   offset: 0
-  name: Burnout cap
+  name: Kill !L1
 expoData:
 - srcRaw: ST
   scale: 0
@@ -160,87 +136,38 @@ inputNames:
     val: St
   1:
     val: TH
-curves:
-- name: Burnout
-  type: 0
-  smooth: 0
-  points:
-  - -100
-  - -50
-  - 0
-  - 50
-  - 100
-- name: Stg1
-  type: 0
-  smooth: 0
-  points:
-  - -100
-  - -50
-  - 0
-  - 50
-  - 100
-- name: Stg2
-  type: 0
-  smooth: 0
-  points:
-  - -100
-  - -50
-  - 0
-  - 50
-  - 100
-- name: Stg3
-  type: 0
-  smooth: 0
-  points:
-  - -100
-  - -50
-  - 0
-  - 50
-  - 100
+# LOGICAL SWITCHES
+# L1 -- SD self-toggle: master safety arm/disarm
+# L2 -- SC self-toggle: transbrake engage/release
 logicalSw:
   0:
-    func: FUNC_VPOS
-    def: I1,5
-    delay: 0
-    duration: 0
-    andsw: '!SC'
-    lsPersist: 0
-    lsState: 0
-  1:
     func: FUNC_STICKY
-    def: L1,NONE
-    delay: 0
-    duration: 10
-    andsw: L1
-    lsPersist: 0
-    lsState: 0
-  2:
-    func: FUNC_STICKY
-    def: L1,NONE
-    delay: 10
-    duration: 10
-    andsw: L1
-    lsPersist: 0
-    lsState: 0
-  3:
-    func: FUNC_STICKY
-    def: SA2,SB
+    def: SD,SD
     delay: 0
     duration: 0
     andsw: NONE
     lsPersist: 0
     lsState: 0
+  1:
+    func: FUNC_STICKY
+    def: SC,SC
+    delay: 0
+    duration: 0
+    andsw: NONE
+    lsPersist: 0
+    lsState: 0
+# CUSTOM FUNCTIONS
+# CF0 -- Red LED: disarmed
+# CF1 -- Green LED: armed
 customFn:
-- swtch: '!L4'
+- swtch: '!L1'
   func: RGB_LED
-  def: red,1,On
-- swtch: L4
+  def: red,0
+- swtch: L1
   func: RGB_LED
-  def: green,1,On
+  def: green,0
 thrTraceSrc: TH
-switchWarning:
-  SA:
-    pos: up
+switchWarning: {}
 thrTrimSw: 0
 potsWarnMode: WARN_OFF
 potsWarnEnabled: 0

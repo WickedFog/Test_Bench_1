@@ -1,90 +1,56 @@
-# model.py
-# RoosTx EdgeTX model builder
-# Session 12 — add_input implemented, all known bugs resolved
+"""
+roosTx/model.py  v0.6  —  Companion-compatible YAML output
+Session 15 — CompanionDumper (indent fix) + regex post-processing (Grok)
+"""
 
+import yaml
 import copy
+import re
+from pathlib import Path
 
-SEMVER = "2.11.4"
 
-# ── HARDWARE NOTES ───────────────────────────────────────────────────────────
-# MT12 channel map (LOCKED):
-#   CH1=ST  CH2=TH  CH3=SA  CH4=SB  CH5=SC  CH6=SD(RESERVED)
-#   CH7=S1  CH8=S2  CH9=FL1  CH10=FL2
-#
-# SC2 / SD2 / SB2 DO NOT EXIST — SB, SC, SD are momentary (pos1 only)
-# CH6/SD is the factory safety lockout — never assign it
-#
-# flightModes bitmask in mixes:
-#   leftmost char = FM0, rightmost = FM8
-#   0 = active in this FM, 1 = disabled in this FM
-#   "000000000" = active in all FMs
-#   "011111111" = FM0 only
-#   "101111111" = FM1 only
-#   "110111111" = FM2 only
-#
-# LS delay/duration are stored in tenths of a second
-#   delay=10 = 1.0s,  delay=1 = 0.1s
-# ─────────────────────────────────────────────────────────────────────────────
+# -- CompanionDumper ----------------------------------------------------------
+# Handles list indentation to match Companion format.
+# Regex post-processing in save() and _companion_fixup() handles quoting.
+
+class CompanionDumper(yaml.Dumper):
+    def increase_indent(self, flow=False, indentless=False):
+        return super().increase_indent(flow=flow, indentless=False)
+
+
+def _companion_fixup(raw):
+    """Fix PyYAML quoting quirks to match Companion's native YAML output."""
+    raw = re.sub(r"''", '""', raw)                                              # '' -> ""
+    raw = re.sub(r'(\s+)["\']([01]{9})["\']', r'\1\2', raw)                    # '000000000' -> 000000000
+    raw = re.sub(r'(\s+)["\'](OFF|ON|GLOBAL|WARN_OFF|WARN_ON|JOYSTICK|none)["\']', r'\1\2', raw)  # 'OFF' -> OFF
+    raw = re.sub(r'(\s+)["\'](![^"\']+)["\']', r'\1"\2"', raw)                 # '!L1' -> "!L1"
+    return raw
+# -----------------------------------------------------------------------------
+
+
+# -- Default model skeleton ---------------------------------------------------
 
 DEFAULT_MODEL = {
-    "semver": SEMVER,
-    "header": {
-        "name": "",
-        "bitmap": "",
-        "labels": ""
-    },
-    "noGlobalFunctions": 0,
-    "thrTrim": 0,
-    "trimInc": 0,
-    "displayTrims": 0,
-    "ignoreSensorIds": 0,
-    "showInstanceIds": 0,
-    "disableThrottleWarning": 0,
-    "enableCustomThrottleWarning": 0,
-    "customThrottleWarningPosition": 0,
-    "beepANACenter": 0,
-    "extendedLimits": 0,
-    "extendedTrims": 0,
-    "throttleReversed": 0,
-    "checklistInteractive": 0,
-    "flightModeData": {},
-    "mixData": [],
-    "expoData": [],
-    "inputNames": {},
-    "curves": [],
-    "logicalSw": {},
-    "customFn": [],
-    "thrTraceSrc": "TH",
-    "switchWarning": {},
-    "thrTrimSw": 0,
-    "potsWarnMode": "WARN_OFF",
-    "potsWarnEnabled": 0,
-    "jitterFilter": "GLOBAL",
-    "displayChecklist": 0,
-    "telemetryProtocol": 0,
-    "varioData": {
-        "source": "none",
-        "centerSilent": 0,
-        "centerMax": 0,
-        "centerMin": 0,
-        "min": 0,
-        "max": 0
-    },
+    "semver": "2.11.4",
+    "header": {"name": "New Model", "bitmap": "", "labels": ""},
+    "noGlobalFunctions": 0, "thrTrim": 0, "trimInc": 0, "displayTrims": 0,
+    "ignoreSensorIds": 0, "showInstanceIds": 0, "disableThrottleWarning": 0,
+    "enableCustomThrottleWarning": 0, "customThrottleWarningPosition": 0,
+    "beepANACenter": 0, "extendedLimits": 0, "extendedTrims": 0,
+    "throttleReversed": 0, "checklistInteractive": 0,
+    "flightModeData": {}, "mixData": [], "expoData": [],
+    "inputNames": {}, "logicalSw": {}, "customFn": {},
+    "thrTraceSrc": "TH", "switchWarning": {},
+    "thrTrimSw": 0, "potsWarnMode": "WARN_OFF", "potsWarnEnabled": 0,
+    "jitterFilter": "GLOBAL", "displayChecklist": 0, "telemetryProtocol": 0,
+    "varioData": {"source": "none", "centerSilent": 0, "centerMax": 0,
+                  "centerMin": 0, "min": 0, "max": 0},
     "rssiSource": "none",
-    "rfAlarms": {
-        "warning": 45,
-        "critical": 42
-    },
+    "rfAlarms": {"warning": 45, "critical": 42},
     "disableTelemetryWarning": 0,
-    "trainerData": {
-        "mode": "OFF",
-        "channelsStart": 0,
-        "channelsCount": -8,
-        "frameLength": 0,
-        "delay": 0,
-        "pulsePol": 0
-    },
-    "modelRegistrationID": "MT12",
+    "trainerData": {"mode": "OFF", "channelsStart": 0, "channelsCount": -8,
+                    "frameLength": 0, "delay": 0, "pulsePol": 0},
+    "modelRegistrationID": "",
     "hatsMode": "GLOBAL",
     "usbJoystickExtMode": 0,
     "usbJoystickIfMode": "JOYSTICK",
@@ -98,176 +64,152 @@ DEFAULT_MODEL = {
     "modelLSDisabled": "GLOBAL",
     "modelSFDisabled": "GLOBAL",
     "modelCustomScriptsDisabled": "GLOBAL",
-    "modelTelemetryDisabled": "GLOBAL"
+    "modelTelemetryDisabled": "GLOBAL",
 }
 
 
 class EdgeTXModel:
+    def __init__(self, name="New Model"):
+        self._data = copy.deepcopy(DEFAULT_MODEL)
+        self._data["header"]["name"] = name
+        self._radio_map = {}
 
-    def __init__(self, name=""):
-        self._model = copy.deepcopy(DEFAULT_MODEL)
-        self._model["header"]["name"] = name
+    def set_registration_id(self, reg_id):
+        self._data["modelRegistrationID"] = reg_id
 
-    # ── DRIVE MODES ──────────────────────────────────────────────────────────
-    def add_flight_mode(self, index, name, swtch=None, fadeIn=0, fadeOut=0):
-        """
-        Add a Drive Mode (EdgeTX flight mode).
-        FM0 = Race    (SA up, default, no switch)
-        FM1 = Stage   (SA1 = SA mid)
-        FM2 = Burnout (SA2 = SA down)
-        """
-        fm = {"name": name, "fadeIn": fadeIn, "fadeOut": fadeOut}
-        if swtch:
-            fm["swtch"] = swtch
-        self._model["flightModeData"][index] = fm
+    def set_switch_warning(self, sw, pos):
+        self._data["switchWarning"][sw] = {"pos": pos}
 
-    # ── INPUTS ───────────────────────────────────────────────────────────────
-    def add_input(self, index, src, name, chn, weight=100, mode=3,
-                  offset=0, curve_type=1, curve_value=0,
-                  flightModes="000000000", trim_source=0):
-        """
-        Populate expoData entry and inputNames entry.
-        Previously a no-op (pass). Now fully implemented.
+    def add_flight_mode(self, idx, name, switch=""):
+        fm = make_flight_mode(name, switch)
+        self._data["flightModeData"][str(idx)] = fm
 
-        src:        "ST" or "TH"
-        name:       display name for inputNames ("St", "TH")
-        chn:        channel index (0=ST, 1=TH)
-        weight:     100 = full, no scaling
-        mode:       3 = both directions
-        curve_type: 1 = custom (type 1, value 0 = no expo applied)
-        """
-        self._model["expoData"].append({
+    def add_input(self, idx, src, name="", weight=100, offset=0, curve_type=0, curve_value=0):
+        expo = {
+            "chn": idx,
             "srcRaw": src,
-            "scale": 0,
-            "mode": mode,
-            "chn": chn,
-            "swtch": "NONE",
-            "flightModes": flightModes,
             "weight": weight,
-            "offset": offset,
-            "curve": {
-                "type": curve_type,
-                "value": curve_value
-            },
-            "trimSource": trim_source,
-            "name": ""
-        })
-        self._model["inputNames"][index] = {"val": name}
-
-    # ── MIXES ────────────────────────────────────────────────────────────────
-    def add_mix(self, destCh, srcRaw, weight=100, swtch="NONE",
-                curve_type=0, curve_value=0,
-                delayUp=0, delayDown=0,
-                speedUp=0, speedDown=0,
-                carryTrim=0, mltpx="ADD",
-                mixWarn=0, flightModes="000000000",
-                offset=0, name=""):
-        """
-        Add a mix line.
-
-        flightModes bitmask (9 chars):
-          leftmost = FM0, rightmost = FM8
-          0 = mix active in this FM
-          1 = mix disabled in this FM
-          "000000000" = active in all FMs (default)
-          "011111111" = FM0 only
-          "101111111" = FM1 only
-          "110111111" = FM2 only
-
-        speedUp/speedDown: tenths of a second (10 = 1.0s ramp)
-        mltpx: "ADD" for base mixes, "REPL" for override mixes
-        """
-        self._model["mixData"].append({
-            "destCh": destCh,
-            "srcRaw": srcRaw,
-            "weight": weight,
-            "swtch": swtch,
-            "curve": {"type": curve_type, "value": curve_value},
-            "delayPrec": 0,
-            "delayUp": delayUp,
-            "delayDown": delayDown,
-            "speedPrec": 0,
-            "speedUp": speedUp,
-            "speedDown": speedDown,
-            "carryTrim": carryTrim,
-            "mltpx": mltpx,
-            "mixWarn": mixWarn,
-            "flightModes": flightModes,
-            "offset": offset,
-            "name": name
-        })
-
-    # ── LOGICAL SWITCHES ─────────────────────────────────────────────────────
-    def add_logical_switch(self, index, func, v1, v2,
-                           andsw="NONE", delay=0, duration=0):
-        """
-        Add a logical switch.
-
-        delay/duration: tenths of a second (10 = 1.0s, 1 = 0.1s)
-
-        FUNC_VPOS:   v1=source, v2=threshold (e.g. I1, 5 = throttle > 0.5%)
-        FUNC_STICKY: v1=set_trigger, v2=clear_trigger
-          - andsw on FUNC_STICKY is a HARD GATE
-          - if gate goes false while latched, output drops immediately
-
-        NEVER use SC2/SD2/SB2 — use SC1/SD1/SB1 (momentary = pos1 only)
-        GVs cannot be used in delay/duration fields (uint8_t integers only)
-        """
-        self._model["logicalSw"][index] = {
-            "func": func,
-            "def": f"{v1},{v2}",
-            "delay": delay,
-            "duration": duration,
-            "andsw": andsw,
-            "lsPersist": 0,
-            "lsState": 0
-        }
-
-    # ── CUSTOM FUNCTIONS ─────────────────────────────────────────────────────
-    def add_custom_fn(self, swtch, func, defn):
-        """
-        Add a custom function.
-
-        OVERRIDE_CHANNEL defn format: "channel_index,value,enable"
-          channel_index: 0-indexed (0=CH1, 1=CH2)
-          value:         -1024 to 1024  (0 = zero output / kill)
-          enable:        1 = active
-          Example: "1,0,1" = kill CH2 (throttle)
-
-        RGB_LED defn format: "color,led_index,state"
-          Example: "red,1,On" / "green,1,On"
-        """
-        self._model["customFn"].append({
-            "swtch": swtch,
-            "func": func,
-            "def": defn
-        })
-
-    # ── CURVES ───────────────────────────────────────────────────────────────
-    def add_curve(self, index, name, points):
-        """
-        Add a point-based curve.
-        Straight line placeholder: [-100, -50, 0, 50, 100]
-        Point values: -100 to 100.
-        To reference in a mix: curve_type=1, curve_value=<this index>
-
-        TODO: Kevin dials in actual sine curves after radio testing.
-        """
-        while len(self._model["curves"]) <= index:
-            self._model["curves"].append(None)
-        self._model["curves"][index] = {
             "name": name,
-            "type": 0,
-            "smooth": 0,
-            "points": points
+            "mode": 3,
+            "offset": offset,
+            "curve": {"type": curve_type, "value": curve_value},
+            "swtch": "NONE",
         }
+        self._data["expoData"].append(expo)
+        if name:
+            self._data["inputNames"][str(idx)] = name
 
-    # ── MISC ─────────────────────────────────────────────────────────────────
-    def set_switch_warning(self, switch, pos):
-        self._model["switchWarning"][switch] = {"pos": pos}
+    def set_input_name(self, idx, name):
+        self._data["inputNames"][str(idx)] = name
 
-    def set_thr_trace(self, src):
-        self._model["thrTraceSrc"] = src
+    def add_mix(self, dest_ch, src_raw, weight=100, switch="NONE", mltpx="ADD",
+                flight_modes="000000000", name="", **kwargs):
+        mix = {
+            "destCh": dest_ch,
+            "srcRaw": src_raw,
+            "weight": weight,
+            "swtch": switch,
+            "curve": {"type": 0, "value": 0},
+            "delayPrec": 0, "delayUp": 0, "delayDown": 0,
+            "speedPrec": 0, "speedUp": 0, "speedDown": 0,
+            "carryTrim": 0,
+            "mltpx": mltpx,
+            "mixWarn": 0,
+            "flightModes": flight_modes,
+            "offset": 0,
+            "name": name,
+        }
+        mix.update(kwargs)
+        self._data["mixData"].append(mix)
 
-    def build(self):
-        return copy.deepcopy(self._model)
+    def add_logical_switch(self, idx, func, def1, and_switch="", delay=0, duration=0):
+        ls = {
+            "func": func,
+            "def": def1,
+        }
+        if and_switch:
+            ls["andsw"] = and_switch
+        if delay:
+            ls["delay"] = delay
+        if duration:
+            ls["duration"] = duration
+        self._data["logicalSw"][str(idx)] = ls
+
+    def add_custom_fn(self, idx, swtch, func, def_str):
+        cf = {
+            "swtch": swtch,
+            "func": func,
+            "def": def_str,
+        }
+        self._data["customFn"][str(idx)] = cf
+
+    def set_throttle_trace(self, src):
+        self._data["thrTraceSrc"] = src
+
+    def save(self, path):
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        raw = yaml.dump(
+            self._data,
+            Dumper=CompanionDumper,
+            default_flow_style=False,
+            sort_keys=False,
+            allow_unicode=True,
+            indent=2,
+            width=1000
+        )
+        raw = _companion_fixup(raw)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(raw)
+        print(f"Saved: {path}")
+
+    def describe(self):
+        d = self._data
+        print(f"{'='*55}")
+        print(f"  RoosTx Model: {d['header']['name']} (semver {d['semver']})")
+        print(f"{'='*55}")
+
+        fm = d.get("flightModeData", {})
+        print(f"\n  Flight Mode ({len(fm)}):")
+        for idx, mode in fm.items():
+            print(f"    [{idx}] {mode['name']:15s}  switch={mode.get('swtch','DEFAULT')}")
+
+        print(f"\n  Inputs ({len(d.get('expoData',[]))}):")
+        for inp in d.get("expoData", []):
+            print(f"    CH{inp['chn']+1} <- {inp['srcRaw']:6s}  weight={inp['weight']}%")
+
+        print(f"\n  Mixes ({len(d.get('mixData',[]))}):")
+        for m in d.get("mixData", []):
+            lbl = f"  ({m['name']})" if m.get("name") else ""
+            print(f"    CH{m['destCh']+1} <- {m['srcRaw']:6s} "
+                  f"weight={m['weight']:4d}%  sw={m['swtch']:8s}  "
+                  f"mltpx={m['mltpx']}{lbl}")
+
+        ls = d.get("logicalSw", {})
+        if ls:
+            print(f"\n  Logical Switches ({len(ls)}):")
+            for idx, sw in ls.items():
+                print(f"    L{int(idx)+1}  {sw['func']:22s}  def={sw['def']}")
+
+        cf = d.get("customFn", {})
+        if cf:
+            print(f"\n  Custom Functions ({len(cf)}):")
+            for idx, fn in cf.items():
+                print(f"    SF{int(idx)+1}  sw={fn['swtch']:8s}  {fn['func']:25s}  {fn['def']}")
+
+        sw_warn = d.get("switchWarning", {})
+        if sw_warn:
+            print(f"\n  Switch Warnings:")
+            for sw, val in sw_warn.items():
+                print(f"    {sw} must be: {val['pos']}")
+        print()
+
+
+# -- Helper factories ---------------------------------------------------------
+
+def make_flight_mode(name, switch="", fade_in=0, fade_out=0):
+    """Always put swtch BEFORE name — matches Companion field order."""
+    fm = {"fadeIn": fade_in, "fadeOut": fade_out}
+    if switch and switch != "NONE":
+        fm["swtch"] = switch
+    fm["name"] = name
+    return fm
